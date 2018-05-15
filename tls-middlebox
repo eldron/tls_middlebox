@@ -1,0 +1,30 @@
+1. middlebox generates (alpha, g^alpha) for each curve
+2. middlebox and firefox run TLS to share g^alpha
+3. on the first tls handshake, firefox generate random a_0
+4. firefox generate fake random a_n = H(g^alpha^a_(n-1))
+5. middlebox can compute a_n
+6. middlebox can compute master secret (B_{n})^a_n
+
+
+OR
+1. middlebox and firefox run TLS to generate k
+2. middlebox gnerate (alpha, g^alpha) for each curve
+3. middlebox give firefox g^alpha
+4. firefox compute a_1 = H(k||g^alpha)
+5. middlebox can also compute a_1 = H(k||g^alpha)
+6. firefox compute a_{n+1} = H(k||A_{n}), store A_{i}
+7. middlebox record each A_{i}, compute a_{n+1} = H(k||A_{n})
+
+Symmetric:
+1. middlebox generate k, enc with firefox's public key, send to firefox, or TLS transmission
+2. firefox compute a_n = H(k, common handshake msg)
+3. middlebox compute a_n = H(k, common handshake msg)
+
+Asymmetric:
+1. middlebox generate (alpha, g^alpha) for each curve, enc g^alpha with firefox's public key, send to firefox
+2. firefox make first handshake, then terminate, ...
+
+middlebox和firefox计算A_n实际上是DH key exchange的一种形式
+使用非对称：为防止firefox泄漏k，firefox泄漏g^alpha对攻击者没有意义
+
+-lfreebl3 -lnssckbi -lplc4 -lsqlite3 -lfreeblpriv3 -lnssdbm3 -lplds4 -lssl3 -lnspr4 -lnsssysinit -lsmime3 -lnss3 -lnssutil3 -lsoftokn3
