@@ -240,7 +240,7 @@ configure:7947: $? = 0
 configure:7947: result: yes
 configure:7947: checking for gettid
 configure:7947: gcc -o conftest   -Wall    conftest.c  -ldl  >&5
-/tmp/ccw8HWIH.o: In function `main':
+/tmp/cchxsLDC.o: In function `main':
 conftest.c:(.text+0xa): undefined reference to `gettid'
 collect2: error: ld returned 1 exit status
 configure:7947: $? = 1
@@ -323,7 +323,7 @@ configure:7947: $? = 0
 configure:7947: result: yes
 configure:7947: checking for __secure_getenv
 configure:7947: gcc -o conftest   -Wall    conftest.c  -ldl  >&5
-/tmp/cctwI8kO.o: In function `main':
+/tmp/ccH5VwOR.o: In function `main':
 conftest.c:(.text+0xa): undefined reference to `__secure_getenv'
 collect2: error: ld returned 1 exit status
 configure:7947: $? = 1

@@ -4547,6 +4547,8 @@ ssl3_SendClientHello(sslSocket *ss, sslClientHelloType type)
     PRInt32 flags;
     unsigned int cookieLen = ss->ssl3.hs.cookie.len;
 
+    fprintf(stderr, "ssl3_sendClientHello: version range max = %d, min = %d\n", ss->vrange.max, ss->vrange.min);
+    
     SSL_TRC(3, ("%d: SSL3[%d]: send %s ClientHello handshake", SSL_GETPID(),
                 ss->fd, ssl_ClientHelloTypeName(type)));
 

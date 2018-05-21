@@ -38,6 +38,7 @@ fclose U
 fcntl U
 fflush U
 fopen U
+fprintf U
 fputc U
 fputs U
 ftell U
