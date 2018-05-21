@@ -41,6 +41,8 @@ char *hostName = NULL;
 char *password = NULL;
 unsigned short port = 0;
 
+char * filename = NULL;
+
 static void
 Usage(const char *progName)
 {
@@ -100,6 +102,17 @@ retry:
 		goto loser;
 	}
 
+	// force tls 1.3
+	SSLVersionRange version_range;
+    version_range.max = SSL_LIBRARY_VERSION_TLS_1_3;
+    version_range.min = SSL_LIBRARY_VERSION_TLS_1_3;
+	secStatus = SSL_VersionRangeSet(sslSocket, &version_range);
+    if(secStatus != SECSuccess){
+        exitErr("set version range error\n");
+    } else {
+		fprintf(stderr, "set tls version range succeeded\n");
+	}
+
 	/* Set configuration options. */
 	secStatus = SSL_OptionSet(sslSocket, SSL_SECURITY, PR_TRUE);
 	if (secStatus != SECSuccess) {
@@ -155,6 +168,42 @@ loser:
 
 
 const char requestString[] = {"GET /testfile HTTP/1.0\r\n\r\n" };
+
+// simple handle connection
+// read from a local file, send file content to server
+SECStatus simple_handle_connection(PRFileDesc * sslSocket){
+	int	     countRead = 0;
+	PRInt32  numBytes;
+	char    *readBuffer;
+
+	readBuffer = PORT_Alloc(RD_BUF_SIZE);
+	if (!readBuffer) {
+		exitErr("PORT_Alloc");
+	}
+
+	/* compose the http request here. */
+
+	numBytes = PR_Write(sslSocket, requestString, strlen(requestString));
+	if (numBytes <= 0) {
+		errWarn("PR_Write");
+		PR_Free(readBuffer);
+		readBuffer = NULL;
+		return SECFailure;
+	}
+
+	printSecurityInfo(sslSocket);
+	
+	PR_Free(readBuffer);
+	readBuffer = NULL;
+
+	/* Caller closes the socket. */
+
+	// fprintf(stderr, 
+	//         "***** Connection %d read %d bytes total.\n", 
+	//         connection, countRead);
+
+	return SECSuccess;	/* success */
+}
 
 SECStatus
 handle_connection(PRFileDesc *sslSocket, int connection)
@@ -212,6 +261,7 @@ handle_connection(PRFileDesc *sslSocket, int connection)
 /* one copy of this function is launched in a separate thread for each
 ** connection to be made.
 */
+// connection means connection number
 SECStatus
 do_connects(void *a, int connection)
 {
@@ -224,7 +274,7 @@ do_connects(void *a, int connection)
 	SECStatus   secStatus;
 
 	/* Set up SSL secure socket. */
-	sslSocket = setupSSLSocket(addr);
+	sslSocket = setupSSLSocket(addr); // forced tls 1.3
 	if (sslSocket == NULL) {
 		errWarn("setupSSLSocket");
 		return SECFailure;
@@ -280,11 +330,16 @@ do_connects(void *a, int connection)
 		return secStatus;
 	}
 
-	secStatus = handle_connection(sslSocket, connection);
-	if (secStatus != SECSuccess) {
-		errWarn("handle_connection");
-		return secStatus;
+	secStatus = simple_handle_connection(sslSocket);
+	if(secStatus != SECSuccess){
+		errWarn("simple_handle_connection");
+		return SECFailure;
 	}
+	// secStatus = handle_connection(sslSocket, connection);
+	// if (secStatus != SECSuccess) {
+	// 	errWarn("handle_connection");
+	// 	return secStatus;
+	// }
 
 	PR_Close(sslSocket);
 	return SECSuccess;
@@ -319,17 +374,19 @@ client_main(unsigned short      port,
 		exitErr("launch_thread");
 	}
 
-	if (connections > 1) {
-		/* wait for the first connection to terminate, then launch the rest. */
-		reap_threads(&threadMGR);
-		/* Start up the connections */
-		for (i = 2; i <= connections; ++i) {
-			secStatus = launch_thread(&threadMGR, do_connects, &addr, i);
-			if (secStatus != SECSuccess) {
-				errWarn("launch_thread");
-			}
-		}
-	}
+	// modify here to support multiple connections
+
+	// if (connections > 1) {
+	// 	/* wait for the first connection to terminate, then launch the rest. */
+	// 	reap_threads(&threadMGR);
+	// 	/* Start up the connections */
+	// 	for (i = 2; i <= connections; ++i) {
+	// 		secStatus = launch_thread(&threadMGR, do_connects, &addr, i);
+	// 		if (secStatus != SECSuccess) {
+	// 			errWarn("launch_thread");
+	// 		}
+	// 	}
+	// }
 
 	reap_threads(&threadMGR);
 	destroy_thread_data(&threadMGR);
