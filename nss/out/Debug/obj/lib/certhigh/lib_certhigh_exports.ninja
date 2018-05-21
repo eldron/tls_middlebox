@@ -1,0 +1,14 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/ocsp.h: copy $
+    ../../lib/certhigh/ocsp.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/ocspt.h: copy $
+    ../../lib/certhigh/ocspt.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ocspi.h: copy $
+    ../../lib/certhigh/ocspi.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ocspti.h: copy $
+    ../../lib/certhigh/ocspti.h
+build obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp: $
+    stamp /home/work/Documents/tls_middlebox/dist/public/nss/ocsp.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/ocspt.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ocspi.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ocspti.h
+

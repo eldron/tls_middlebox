@@ -1,0 +1,26 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/cmmf.h: copy $
+    ../../lib/crmf/cmmf.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/cmmft.h: copy $
+    ../../lib/crmf/cmmft.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/crmf.h: copy $
+    ../../lib/crmf/crmf.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/crmft.h: copy $
+    ../../lib/crmf/crmft.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/cmmfi.h: copy $
+    ../../lib/crmf/cmmfi.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/cmmfit.h: copy $
+    ../../lib/crmf/cmmfit.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/crmfi.h: copy $
+    ../../lib/crmf/crmfi.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/crmfit.h: copy $
+    ../../lib/crmf/crmfit.h
+build obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/cmmf.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/cmmft.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/crmf.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/crmft.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/cmmfi.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/cmmfit.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/crmfi.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/crmfit.h
+

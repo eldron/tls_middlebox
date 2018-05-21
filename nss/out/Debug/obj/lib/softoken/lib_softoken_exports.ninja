@@ -1,0 +1,29 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/lowkeyi.h: copy $
+    ../../lib/softoken/lowkeyi.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/lowkeyti.h: copy $
+    ../../lib/softoken/lowkeyti.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/lgglue.h: copy $
+    ../../lib/softoken/lgglue.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pkcs11ni.h: copy $
+    ../../lib/softoken/pkcs11ni.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/sdb.h: copy $
+    ../../lib/softoken/sdb.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/sftkdbt.h: copy $
+    ../../lib/softoken/sftkdbt.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/softkver.h: copy $
+    ../../lib/softoken/softkver.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/softoken.h: copy $
+    ../../lib/softoken/softoken.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/softoknt.h: copy $
+    ../../lib/softoken/softoknt.h
+build obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp: $
+    stamp /home/work/Documents/tls_middlebox/dist/public/nss/lowkeyi.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/lowkeyti.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/lgglue.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pkcs11ni.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sdb.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sftkdbt.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/softkver.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/softoken.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/softoknt.h
+

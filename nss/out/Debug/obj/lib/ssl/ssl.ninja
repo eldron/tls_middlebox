@@ -1,0 +1,111 @@
+defines = -DNSS_ALLOW_SSLKEYLOGFILE=1 -DNSS_FIPS_DISABLED $
+    -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 -DNSS_X64 -DNSS_USE_64 $
+    -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O0 -g -gdwarf-2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/ssl/ssl.authcert.o: cc ../../lib/ssl/authcert.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.cmpcert.o: cc ../../lib/ssl/cmpcert.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.dtlscon.o: cc ../../lib/ssl/dtlscon.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.dtls13con.o: cc ../../lib/ssl/dtls13con.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.prelib.o: cc ../../lib/ssl/prelib.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.selfencrypt.o: cc ../../lib/ssl/selfencrypt.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssl3con.o: cc ../../lib/ssl/ssl3con.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssl3ecc.o: cc ../../lib/ssl/ssl3ecc.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssl3ext.o: cc ../../lib/ssl/ssl3ext.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssl3exthandle.o: cc ../../lib/ssl/ssl3exthandle.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssl3gthr.o: cc ../../lib/ssl/ssl3gthr.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslauth.o: cc ../../lib/ssl/sslauth.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslbloom.o: cc ../../lib/ssl/sslbloom.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslcert.o: cc ../../lib/ssl/sslcert.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslcon.o: cc ../../lib/ssl/sslcon.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssldef.o: cc ../../lib/ssl/ssldef.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslencode.o: cc ../../lib/ssl/sslencode.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslenum.o: cc ../../lib/ssl/sslenum.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslerr.o: cc ../../lib/ssl/sslerr.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslerrstrs.o: cc ../../lib/ssl/sslerrstrs.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslgrp.o: cc ../../lib/ssl/sslgrp.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslinfo.o: cc ../../lib/ssl/sslinfo.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslinit.o: cc ../../lib/ssl/sslinit.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslmutex.o: cc ../../lib/ssl/sslmutex.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslnonce.o: cc ../../lib/ssl/sslnonce.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslreveal.o: cc ../../lib/ssl/sslreveal.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslsecur.o: cc ../../lib/ssl/sslsecur.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslsnce.o: cc ../../lib/ssl/sslsnce.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslsock.o: cc ../../lib/ssl/sslsock.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslspec.o: cc ../../lib/ssl/sslspec.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.ssltrace.o: cc ../../lib/ssl/ssltrace.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.sslver.o: cc ../../lib/ssl/sslver.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.tls13con.o: cc ../../lib/ssl/tls13con.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.tls13exthandle.o: cc ../../lib/ssl/tls13exthandle.c $
+    || obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.tls13hashstate.o: cc ../../lib/ssl/tls13hashstate.c $
+    || obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.tls13hkdf.o: cc ../../lib/ssl/tls13hkdf.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.tls13replay.o: cc ../../lib/ssl/tls13replay.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/ssl/ssl.unix_err.o: cc ../../lib/ssl/unix_err.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libssl.a: alink obj/lib/ssl/ssl.authcert.o obj/lib/ssl/ssl.cmpcert.o $
+    obj/lib/ssl/ssl.dtlscon.o obj/lib/ssl/ssl.dtls13con.o $
+    obj/lib/ssl/ssl.prelib.o obj/lib/ssl/ssl.selfencrypt.o $
+    obj/lib/ssl/ssl.ssl3con.o obj/lib/ssl/ssl.ssl3ecc.o $
+    obj/lib/ssl/ssl.ssl3ext.o obj/lib/ssl/ssl.ssl3exthandle.o $
+    obj/lib/ssl/ssl.ssl3gthr.o obj/lib/ssl/ssl.sslauth.o $
+    obj/lib/ssl/ssl.sslbloom.o obj/lib/ssl/ssl.sslcert.o $
+    obj/lib/ssl/ssl.sslcon.o obj/lib/ssl/ssl.ssldef.o $
+    obj/lib/ssl/ssl.sslencode.o obj/lib/ssl/ssl.sslenum.o $
+    obj/lib/ssl/ssl.sslerr.o obj/lib/ssl/ssl.sslerrstrs.o $
+    obj/lib/ssl/ssl.sslgrp.o obj/lib/ssl/ssl.sslinfo.o $
+    obj/lib/ssl/ssl.sslinit.o obj/lib/ssl/ssl.sslmutex.o $
+    obj/lib/ssl/ssl.sslnonce.o obj/lib/ssl/ssl.sslreveal.o $
+    obj/lib/ssl/ssl.sslsecur.o obj/lib/ssl/ssl.sslsnce.o $
+    obj/lib/ssl/ssl.sslsock.o obj/lib/ssl/ssl.sslspec.o $
+    obj/lib/ssl/ssl.ssltrace.o obj/lib/ssl/ssl.sslver.o $
+    obj/lib/ssl/ssl.tls13con.o obj/lib/ssl/ssl.tls13exthandle.o $
+    obj/lib/ssl/ssl.tls13hashstate.o obj/lib/ssl/ssl.tls13hkdf.o $
+    obj/lib/ssl/ssl.tls13replay.o obj/lib/ssl/ssl.unix_err.o || $
+    obj/nss_exports.actions_depends.stamp

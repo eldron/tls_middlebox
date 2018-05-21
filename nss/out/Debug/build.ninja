@@ -1,0 +1,452 @@
+cc = cc
+cxx = c++
+ld = $cc
+ldxx = $cxx
+ar = ar
+nm = nm
+readelf = readelf
+
+pool link_pool
+  depth = 1
+
+rule cc
+  command = $cc -MMD -MF $out.d $defines $includes $cflags $cflags_c $cflags_pch_c -c $in -o $out
+  description = CC $out
+  depfile = $out.d
+  deps = gcc
+rule cc_s
+  command = $cc $defines $includes $cflags $cflags_c $cflags_pch_c -c $in -o $out
+  description = CC $out
+rule cxx
+  command = $cxx -MMD -MF $out.d $defines $includes $cflags $cflags_cc $cflags_pch_cc -c $in -o $out
+  description = CXX $out
+  depfile = $out.d
+  deps = gcc
+rule alink
+  command = rm -f $out && $ar rcs $arflags $out $in
+  description = AR $out
+rule alink_thin
+  command = rm -f $out && $ar rcsT $arflags $out $in
+  description = AR $out
+rule solink
+  command = if [ ! -e $lib -o ! -e $lib.TOC ]; then $ld -shared $ldflags -o $lib -Wl,-soname=$soname @$link_file_list $
+      && { $readelf -d $lib | grep SONAME ; $nm -gD -f p $lib | cut -f1-2 -d' '; } > $lib.TOC; else $ld -shared $
+      $ldflags -o $lib -Wl,-soname=$soname @$link_file_list && { $readelf -d $lib | grep SONAME ; $nm -gD -f p $lib | $
+      cut -f1-2 -d' '; } > $lib.tmp && if ! cmp -s $lib.tmp $lib.TOC; then mv $lib.tmp $lib.TOC ; fi; fi
+  description = SOLINK $lib
+  pool = link_pool
+  restat = 1
+  rspfile = $link_file_list
+  rspfile_content = -Wl,--whole-archive $in $solibs -Wl,--no-whole-archive $libs
+rule solink_module
+  command = if [ ! -e $lib -o ! -e $lib.TOC ]; then $ld -shared $ldflags -o $lib -Wl,-soname=$soname @$link_file_list $
+      && { $readelf -d $lib | grep SONAME ; $nm -gD -f p $lib | cut -f1-2 -d' '; } > $lib.TOC; else $ld -shared $
+      $ldflags -o $lib -Wl,-soname=$soname @$link_file_list && { $readelf -d $lib | grep SONAME ; $nm -gD -f p $lib | $
+      cut -f1-2 -d' '; } > $lib.tmp && if ! cmp -s $lib.tmp $lib.TOC; then mv $lib.tmp $lib.TOC ; fi; fi
+  description = SOLINK(module) $lib
+  pool = link_pool
+  restat = 1
+  rspfile = $link_file_list
+  rspfile_content = -Wl,--start-group $in -Wl,--end-group $solibs $libs
+rule link
+  command = $ld $ldflags -o $out -Wl,--start-group $in -Wl,--end-group $solibs $libs
+  description = LINK $out
+  pool = link_pool
+rule stamp
+  command = ${postbuilds}touch $out
+  description = STAMP $out
+rule copy
+  command = ln -f $in $out 2>/dev/null || (rm -rf $out && cp -af $in $out)
+  description = COPY $in $out
+
+subninja obj/lib/pki/lib_pki_exports.ninja
+subninja obj/lib/sqlite/lib_sqlite_exports.ninja
+subninja obj/lib/jar/lib_jar_exports.ninja
+subninja obj/lib/softoken/lib_softoken_exports.ninja
+subninja obj/cmd/lib/cmd_lib_exports.ninja
+subninja obj/lib/crmf/lib_crmf_exports.ninja
+subninja obj/lib/certhigh/lib_certhigh_exports.ninja
+subninja obj/lib/base/lib_base_exports.ninja
+subninja obj/gtests/google_test/gtest.ninja
+subninja obj/lib/ssl/lib_ssl_exports.ninja
+subninja obj/lib/ckfw/lib_ckfw_exports.ninja
+subninja obj/lib/cryptohi/lib_cryptohi_exports.ninja
+subninja obj/lib/pkcs12/lib_pkcs12_exports.ninja
+subninja obj/lib/util/lib_util_exports.ninja
+subninja obj/lib/freebl/lib_freebl_exports.ninja
+subninja obj/lib/nss/lib_nss_exports.ninja
+subninja obj/lib/pk11wrap/lib_pk11wrap_exports.ninja
+subninja obj/lib/pkcs7/lib_pkcs7_exports.ninja
+subninja obj/lib/certdb/lib_certdb_exports.ninja
+subninja obj/lib/ckfw/builtins/lib_ckfw_builtins_exports.ninja
+subninja obj/lib/dev/lib_dev_exports.ninja
+subninja obj/lib/dbm/include/lib_dbm_include_exports.ninja
+subninja obj/lib/smime/lib_smime_exports.ninja
+subninja obj/nss_exports.ninja
+subninja obj/lib/freebl/intel-gcm-wrap_c_lib.ninja
+subninja obj/lib/sqlite/sqlite.ninja
+subninja obj/lib/certdb/certdb.ninja
+subninja obj/cpputil/cpputil.ninja
+subninja obj/lib/sqlite/sqlite3.ninja
+subninja obj/lib/pkcs7/pkcs7.ninja
+subninja obj/lib/smime/smime.ninja
+subninja obj/cmd/lib/sectool.ninja
+subninja obj/lib/freebl/gcm-aes-x86_c_lib.ninja
+subninja obj/lib/cryptohi/cryptohi.ninja
+subninja obj/lib/crmf/crmf.ninja
+subninja obj/lib/freebl/freebl.ninja
+subninja obj/lib/jar/jar.ninja
+subninja obj/lib/dev/nssdev.ninja
+subninja obj/lib/nss/nss_static.ninja
+subninja obj/lib/ssl/ssl.ninja
+subninja obj/lib/pk11wrap/pk11wrap.ninja
+subninja obj/lib/dbm/src/dbm.ninja
+subninja obj/lib/pkcs12/pkcs12.ninja
+subninja obj/lib/certhigh/certhi.ninja
+subninja obj/lib/freebl/hw-acc-crypto.ninja
+subninja obj/lib/ckfw/nssckfw.ninja
+subninja obj/lib/base/nssb.ninja
+subninja obj/lib/util/nssutil.ninja
+subninja obj/lib/pki/nsspki.ninja
+subninja obj/lib/softoken/softokn.ninja
+subninja obj/lib/freebl/freebl3.ninja
+subninja obj/lib/softoken/legacydb/nssdbm.ninja
+subninja obj/lib/freebl/freebl_static.ninja
+subninja obj/lib/ckfw/builtins/nssckbi.ninja
+subninja obj/lib/freebl/freeblpriv3.ninja
+subninja obj/lib/util/nssutil3.ninja
+subninja obj/cmd/bltest/bltest.ninja
+subninja obj/lib/smime/smime3_deps.ninja
+subninja obj/gtests/nss_bogo_shim/nss_bogo_shim.ninja
+subninja obj/lib/softoken/softokn_static.ninja
+subninja obj/cmd/rsaperf/rsaperf.ninja
+subninja obj/cmd/pk11ectest/pk11ectest.ninja
+subninja obj/lib/nss/nss3_deps.ninja
+subninja obj/cmd/fbectest/fbectest.ninja
+subninja obj/cmd/ecperf/ecperf.ninja
+subninja obj/lib/softoken/legacydb/nssdbm3.ninja
+subninja obj/lib/softoken/softokn3.ninja
+subninja obj/cmd/chktest/chktest.ninja
+subninja obj/gtests/ssl_gtest/ssl_gtest.ninja
+subninja obj/cmd/shlibsign/mangle/mangle.ninja
+subninja obj/lib/sysinit/nsssysinit_static.ninja
+subninja obj/lib/nss/nss3.ninja
+subninja obj/lib/pk11wrap/pk11wrap_static.ninja
+subninja obj/lib/ssl/ssl3.ninja
+subninja obj/gtests/freebl_gtest/freebl_gtest_deps.ninja
+subninja obj/gtests/certdb_gtest/certdb_gtest.ninja
+subninja obj/gtests/freebl_gtest/prng_gtest.ninja
+subninja obj/lib/sysinit/nsssysinit.ninja
+subninja obj/nss_static_libs.ninja
+subninja obj/gtests/certhigh_gtest/certhigh_gtest.ninja
+subninja obj/gtests/cryptohi_gtest/cryptohi_gtest.ninja
+subninja obj/gtests/freebl_gtest/blake2b_gtest.ninja
+subninja obj/lib/smime/smime3.ninja
+subninja obj/cmd/ssltap/ssltap.ninja
+subninja obj/gtests/util_gtest/util_gtest.ninja
+subninja obj/gtests/softoken_gtest/softoken_gtest.ninja
+subninja obj/cmd/pk12util/pk12util.ninja
+subninja obj/nss-tool/hw-support.ninja
+subninja obj/cmd/selfserv/selfserv.ninja
+subninja obj/cmd/ocspresp/ocspresp.ninja
+subninja obj/cmd/certutil/certutil.ninja
+subninja obj/cmd/lowhashtest/lowhashtest.ninja
+subninja obj/gtests/pk11_gtest/pk11_gtest.ninja
+subninja obj/cmd/pk11gcmtest/pk11gcmtest.ninja
+subninja obj/nss-tool/nss.ninja
+subninja obj/cmd/pk1sign/pk1sign.ninja
+subninja obj/cmd/tstclnt/tstclnt.ninja
+subninja obj/cmd/p7sign/p7sign.ninja
+subninja obj/cmd/ocspclnt/ocspclnt.ninja
+subninja obj/gtests/freebl_gtest/freebl_gtest.ninja
+subninja obj/cmd/tests/dertimetest.ninja
+subninja obj/cmd/pp/pp.ninja
+subninja obj/gtests/der_gtest/der_gtest.ninja
+subninja obj/cmd/smimetools/cmsutil.ninja
+subninja obj/cmd/atob/atob.ninja
+subninja obj/cmd/strsclnt/strsclnt.ninja
+subninja obj/cmd/tests/nonspr10.ninja
+subninja obj/cmd/vfychain/vfychain.ninja
+subninja obj/cmd/modutil/modutil.ninja
+subninja obj/cmd/tests/baddbdir.ninja
+subninja obj/nss_libs.ninja
+subninja obj/cmd/rsapoptst/rsapoptst.ninja
+subninja obj/cmd/oidcalc/oidcalc.ninja
+subninja obj/cmd/makepqg/makepqg.ninja
+subninja obj/cmd/p7content/p7content.ninja
+subninja obj/cmd/symkeyutil/symkeyutil.ninja
+subninja obj/cmd/digest/digest.ninja
+subninja obj/cmd/pwdecrypt/pwdecrypt.ninja
+subninja obj/cmd/sdrtest/sdrtest.ninja
+subninja obj/cmd/p7env/p7env.ninja
+subninja obj/cmd/crmftest/crmftest.ninja
+subninja obj/cmd/crlutil/crlutil.ninja
+subninja obj/cmd/tests/remtest.ninja
+subninja obj/cmd/tests/secmodtest.ninja
+subninja obj/cmd/vfyserv/vfyserv.ninja
+subninja obj/cmd/signtool/signtool.ninja
+subninja obj/cmd/btoa/btoa.ninja
+subninja obj/cmd/listsuites/listsuites.ninja
+subninja obj/cmd/dbtest/dbtest.ninja
+subninja obj/cmd/p7verify/p7verify.ninja
+subninja obj/cmd/multinit/multinit.ninja
+subninja obj/cmd/tests/conflict.ninja
+subninja obj/cmd/pk11mode/pk11mode.ninja
+subninja obj/cmd/shlibsign/shlibsign.ninja
+subninja obj/cmd/tests/encodeinttest.ninja
+subninja obj/cmd/derdump/derdump.ninja
+subninja obj/cmd/addbuiltin/addbuiltin.ninja
+subninja obj/cmd/httpserv/httpserv.ninja
+subninja obj/cmd/signver/signver.ninja
+subninja obj/nss_tests.ninja
+subninja obj/nss_cmds.ninja
+subninja obj/nss_sign_shared_libs.ninja
+
+# Short names for targets.
+build rsapoptst: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/rsapoptst
+build dbm: phony libdbm.a
+build nss_static_libs: phony obj/nss_static_libs.actions_depends.stamp
+build certutil: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/certutil
+build nssutil: phony libnssutil.a
+build atob: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/atob
+build crmf: phony libcrmf.a
+build certdb_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/certdb_gtest
+build lib_jar_exports: phony obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp
+build chktest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/chktest
+build freebl_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/freebl_gtest
+build pk11wrap_static: phony libpk11wrap_static.a
+build jar: phony libjar.a
+build lib_pki_exports: phony obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp
+build symkeyutil: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/symkeyutil
+build lib_softoken_exports: phony obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp
+build freebl3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.so
+build nss_sign_shared_libs: phony obj/nss_sign_shared_libs.actions_rules_copies.stamp
+build softokn3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.so
+build ecperf: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/ecperf
+build nss3_deps: phony obj/lib/nss/nss3_deps.actions_depends.stamp
+build lib_nss_exports: phony obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp
+build sqlite3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so
+build lib_ckfw_builtins_exports: phony /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h
+build nssdbm: phony libnssdbm.a
+build dertimetest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/dertimetest
+build pk12util: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pk12util
+build nsspki: phony libnsspki.a
+build ocspclnt: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/ocspclnt
+build intel-gcm-wrap_c_lib: phony libintel-gcm-wrap_c_lib.a
+build dbm_exports: phony obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build btoa: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/btoa
+build oidcalc: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/oidcalc
+build smime: phony libsmime.a
+build p7env: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/p7env
+build ssl_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/ssl_gtest
+build der_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/der_gtest
+build vfyserv: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/vfyserv
+build pkcs12: phony libpkcs12.a
+build lib_pkcs7_exports: phony obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp
+build lib_crmf_exports: phony obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp
+build nssdev: phony libnssdev.a
+build shlibsign: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/shlibsign
+build addbuiltin: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/addbuiltin
+build pk11gcmtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11gcmtest
+build httpserv: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/httpserv
+build gtest: phony libgtest.a
+build digest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/digest
+build lib_cryptohi_exports: phony obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp
+build nssckbi: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so
+build remtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/remtest
+build lib_util_exports: phony obj/lib/util/lib_util_exports.actions_rules_copies.stamp
+build ocspresp: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/ocspresp
+build vfychain: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/vfychain
+build pk11wrap: phony libpk11wrap.a
+build lib_freebl_exports: phony obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp
+build bltest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/bltest
+build crlutil: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/crlutil
+build lib_ckfw_exports: phony obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp
+build lib_certdb_exports: phony obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp
+build tstclnt: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/tstclnt
+build rsaperf: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/rsaperf
+build p7sign: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/p7sign
+build cmsutil: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/cmsutil
+build certhi: phony libcerthi.a
+build listsuites: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/listsuites
+build util_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/util_gtest
+build nss_exports: phony obj/nss_exports.actions_depends.stamp
+build nsssysinit: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so
+build ssltap: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/ssltap
+build nss_libs: phony obj/nss_libs.actions_depends.stamp
+build smime3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libsmime3.so
+build lib_certhigh_exports: phony obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp
+build freebl_gtest_deps: phony obj/gtests/freebl_gtest/freebl_gtest_deps.actions_depends.stamp
+build baddbdir: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/baddbdir
+build cryptohi: phony libcryptohi.a
+build nss: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/nss
+build sdrtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/sdrtest
+build nssutil3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so
+build pp: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pp
+build p7verify: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/p7verify
+build hw-support: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/hw-support
+build secmodtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/secmodtest
+build nssb: phony libnssb.a
+build modutil: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/modutil
+build freeblpriv3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.so
+build selfserv: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/selfserv
+build dbtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/dbtest
+build ssl3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libssl3.so
+build nsssysinit_static: phony libnsssysinit_static.a
+build gcm-aes-x86_c_lib: phony libgcm-aes-x86_c_lib.a
+build derdump: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/derdump
+build pk1sign: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pk1sign
+build cryptohi_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/cryptohi_gtest
+build nss_static: phony libnss_static.a
+build signver: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/signver
+build blake2b_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/blake2b_gtest
+build freebl: phony libfreebl.a
+build p7content: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/p7content
+build pk11ectest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11ectest
+build nonspr10: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/nonspr10
+build pk11_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11_gtest
+build crmftest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/crmftest
+build nssdbm3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.so
+build multinit: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/multinit
+build sectool: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libsectool.a
+build mangle: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/mangle
+build makepqg: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/makepqg
+build nss3: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libnss3.so
+build sqlite: phony libsqlite.a
+build lowhashtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/lowhashtest
+build lib_ssl_exports: phony obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp
+build nss_cmds: phony obj/nss_cmds.actions_depends.stamp
+build lib_dev_exports: phony obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp
+build freebl_static: phony libfreebl_static.a
+build lib_base_exports: phony obj/lib/base/lib_base_exports.actions_rules_copies.stamp
+build smime3_deps: phony obj/lib/smime/smime3_deps.actions_depends.stamp
+build cmd_lib_exports: phony obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp
+build lib_pk11wrap_exports: phony obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp
+build prng_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/prng_gtest
+build lib_sqlite_exports: phony /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h
+build nss_tests: phony obj/nss_tests.actions_depends.stamp
+build encodeinttest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/encodeinttest
+build nss_bogo_shim: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/nss_bogo_shim
+build pwdecrypt: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pwdecrypt
+build nssckfw: phony libnssckfw.a
+build signtool: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/signtool
+build pkcs7: phony libpkcs7.a
+build conflict: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/conflict
+build lib_pkcs12_exports: phony obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp
+build fbectest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/fbectest
+build softokn_static: phony libsoftokn_static.a
+build softokn: phony libsoftokn.a
+build lib_dbm_include_exports: phony obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build hw-acc-crypto: phony libhw-acc-crypto.a
+build ssl: phony libssl.a
+build cpputil: phony libcpputil.a
+build softoken_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/softoken_gtest
+build lib_smime_exports: phony obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp
+build strsclnt: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/strsclnt
+build certdb: phony libcertdb.a
+build certhigh_gtest: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/certhigh_gtest
+build pk11mode: phony /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11mode
+
+# Empty targets (output for completeness).
+build lib_zlib_exports: phony
+build libpkix: phony
+build nss_zlib: phony
+build pk11wrap_base: phony
+build softokn_base: phony
+
+build all: phony /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/softoken_gtest obj/lib/nss/nss3_deps.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/p7env obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/derdump $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11gcmtest $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/gtests/freebl_gtest/freebl_gtest_deps.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/remtest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/fbectest $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp libgtest.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11_gtest $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/vfychain $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/multinit libcrmf.a libpk11wrap_static.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/chktest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11mode $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/lowhashtest libgcm-aes-x86_c_lib.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/ecperf $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/ssl_gtest libpkcs12.a libsqlite.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libssl3.so libnssutil.a obj/nss_exports.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/nss $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/httpserv $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.so libcpputil.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsmime3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so obj/nss_libs.actions_depends.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    libpkcs7.a /home/work/Documents/tls_middlebox/dist/Debug/bin/makepqg $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/encodeinttest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/util_gtest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/dertimetest obj/lib/smime/smime3_deps.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/secmodtest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/symkeyutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk12util $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk11ectest $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so libnsssysinit_static.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/rsapoptst $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/prng_gtest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/modutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/vfyserv $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/dbtest obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/signtool obj/nss_cmds.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pwdecrypt libdbm.a libnss_static.a libnsspki.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/nss_bogo_shim obj/nss_static_libs.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/certutil $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp libnssb.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/ocspresp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsectool.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/sdrtest $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/tstclnt $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/ssltap $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/oidcalc $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/shlibsign $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/btoa /home/work/Documents/tls_middlebox/dist/Debug/bin/conflict $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/addbuiltin $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/baddbdir $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so libcryptohi.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/p7verify $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/der_gtest libsoftokn.a $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/certdb_gtest $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp libcerthi.a libhw-acc-crypto.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/atob /home/work/Documents/tls_middlebox/dist/Debug/bin/signver $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/cryptohi_gtest $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk1sign $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/ocspclnt $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/hw-support $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/blake2b_gtest $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnss3.so libfreebl_static.a $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp libnssckfw.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/mangle obj/nss_tests.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/selfserv $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/strsclnt $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/certhigh_gtest libfreebl.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/cmsutil /home/work/Documents/tls_middlebox/dist/Debug/bin/pp $
+    libpk11wrap.a libsmime.a obj/nss_sign_shared_libs.actions_rules_copies.stamp libintel-gcm-wrap_c_lib.a $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp /home/work/Documents/tls_middlebox/dist/Debug/bin/nonspr10 $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/listsuites $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h libssl.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/p7sign $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/rsaperf $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/crlutil obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    libnssdev.a obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/digest /home/work/Documents/tls_middlebox/dist/Debug/bin/bltest $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp libnssdbm.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/crmftest libsoftokn_static.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/p7content libjar.a libcertdb.a
+default all

@@ -1,0 +1,6 @@
+CC=
+CCC=
+CXX=
+--depth=/home/work/Documents/tls_middlebox/nss
+-Dnss_dist_dir=/home/work/Documents/tls_middlebox/dist
+--generator-output=.

@@ -1,0 +1,40 @@
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/base/nssb.arena.o: cc ../../lib/base/arena.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.error.o: cc ../../lib/base/error.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.errorval.o: cc ../../lib/base/errorval.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.hash.o: cc ../../lib/base/hash.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.hashops.o: cc ../../lib/base/hashops.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.item.o: cc ../../lib/base/item.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.libc.o: cc ../../lib/base/libc.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.list.o: cc ../../lib/base/list.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.tracker.o: cc ../../lib/base/tracker.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/base/nssb.utf8.o: cc ../../lib/base/utf8.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libnssb.a: alink obj/lib/base/nssb.arena.o obj/lib/base/nssb.error.o $
+    obj/lib/base/nssb.errorval.o obj/lib/base/nssb.hash.o $
+    obj/lib/base/nssb.hashops.o obj/lib/base/nssb.item.o $
+    obj/lib/base/nssb.libc.o obj/lib/base/nssb.list.o $
+    obj/lib/base/nssb.tracker.o obj/lib/base/nssb.utf8.o || $
+    obj/nss_exports.actions_depends.stamp

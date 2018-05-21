@@ -1,0 +1,139 @@
+build obj/gtests/util_gtest/util_gtest.actions_depends.stamp: stamp $
+    obj/nss_exports.actions_depends.stamp libgtest.a libnssutil.a $
+    libnss_static.a libpk11wrap_static.a libcryptohi.a libcerthi.a $
+    libcertdb.a libnssb.a libnssdev.a libnsspki.a libssl.a $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    libsoftokn_static.a libfreebl_static.a libhw-acc-crypto.a $
+    libgcm-aes-x86_c_lib.a libsqlite.a
+
+build obj/gtests/util_gtest/util_gtest.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp
+
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DNSS_USE_STATIC_LIBS -DUSE_UTIL_DIRECTLY $
+    -DNO_NSPR_10_SUPPORT -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES $
+    -DLINUX2_1 -DLINUX -Dlinux -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT $
+    -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I../../lib/util $
+    -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I../../gtests/google_test/gtest/include -I../../gtests/common $
+    -I../../cpputil -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -Wsign-compare -fPIC -pipe -ffunction-sections -fdata-sections $
+    -m64 -Werror -Wall -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/gtests/util_gtest/util_gtest.util_utf8_unittest.o: cxx $
+    ../../gtests/util_gtest/util_utf8_unittest.cc || $
+    obj/gtests/util_gtest/util_gtest.compile_depends.stamp
+build obj/gtests/util_gtest/util_gtest.util_b64_unittest.o: cxx $
+    ../../gtests/util_gtest/util_b64_unittest.cc || $
+    obj/gtests/util_gtest/util_gtest.compile_depends.stamp
+build obj/gtests/util_gtest/util_gtest.util_pkcs11uri_unittest.o: cxx $
+    ../../gtests/util_gtest/util_pkcs11uri_unittest.cc || $
+    obj/gtests/util_gtest/util_gtest.compile_depends.stamp
+build obj/gtests/util_gtest/util_gtest.util_aligned_malloc_unittest.o: cxx $
+    ../../gtests/util_gtest/util_aligned_malloc_unittest.cc || $
+    obj/gtests/util_gtest/util_gtest.compile_depends.stamp
+build obj/gtests/util_gtest/util_gtest.util_memcmpzero_unittest.o: cxx $
+    ../../gtests/util_gtest/util_memcmpzero_unittest.cc || $
+    obj/gtests/util_gtest/util_gtest.compile_depends.stamp
+build obj/gtests/common/util_gtest.gtests.o: cxx $
+    ../../gtests/common/gtests.cc || $
+    obj/gtests/util_gtest/util_gtest.compile_depends.stamp
+
+ldflags = -z noexecstack -m64
+libs = -L/home/work/Documents/tls_middlebox/dist/Debug/lib -lpthread -ldl $
+    -lc -lplds4 -lplc4 -lnspr4
+build /home/work/Documents/tls_middlebox/dist/Debug/bin/util_gtest: link $
+    obj/gtests/util_gtest/util_gtest.util_utf8_unittest.o $
+    obj/gtests/util_gtest/util_gtest.util_b64_unittest.o $
+    obj/gtests/util_gtest/util_gtest.util_pkcs11uri_unittest.o $
+    obj/gtests/util_gtest/util_gtest.util_aligned_malloc_unittest.o $
+    obj/gtests/util_gtest/util_gtest.util_memcmpzero_unittest.o $
+    obj/gtests/common/util_gtest.gtests.o libgtest.a libnssutil.a $
+    libnss_static.a libpk11wrap_static.a libcryptohi.a libcerthi.a $
+    libcertdb.a libnssb.a libnssdev.a libnsspki.a libssl.a $
+    libsoftokn_static.a libfreebl_static.a libhw-acc-crypto.a $
+    libgcm-aes-x86_c_lib.a libsqlite.a | $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/nss_exports.actions_depends.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp
+  ld = $ldxx

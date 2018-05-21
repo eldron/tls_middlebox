@@ -1,0 +1,81 @@
+defines = '-DSHLIB_SUFFIX="so"' '-DSHLIB_PREFIX="lib"' $
+    '-DSHLIB_VERSION="3"' '-DSOFTOKEN_SHLIB_VERSION="3"' $
+    -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 -DNSS_X64 $
+    -DNSS_USE_64 -DNSS_TEST_BUILD -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O0 -g -gdwarf-2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/pk11wrap/pk11wrap_static.dev3hack.o: cc $
+    ../../lib/pk11wrap/dev3hack.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11akey.o: cc $
+    ../../lib/pk11wrap/pk11akey.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11auth.o: cc $
+    ../../lib/pk11wrap/pk11auth.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11cert.o: cc $
+    ../../lib/pk11wrap/pk11cert.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11cxt.o: cc $
+    ../../lib/pk11wrap/pk11cxt.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11err.o: cc $
+    ../../lib/pk11wrap/pk11err.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11kea.o: cc $
+    ../../lib/pk11wrap/pk11kea.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11list.o: cc $
+    ../../lib/pk11wrap/pk11list.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11load.o: cc $
+    ../../lib/pk11wrap/pk11load.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11mech.o: cc $
+    ../../lib/pk11wrap/pk11mech.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11merge.o: cc $
+    ../../lib/pk11wrap/pk11merge.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11nobj.o: cc $
+    ../../lib/pk11wrap/pk11nobj.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11obj.o: cc $
+    ../../lib/pk11wrap/pk11obj.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11pars.o: cc $
+    ../../lib/pk11wrap/pk11pars.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11pbe.o: cc $
+    ../../lib/pk11wrap/pk11pbe.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11pk12.o: cc $
+    ../../lib/pk11wrap/pk11pk12.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11pqg.o: cc $
+    ../../lib/pk11wrap/pk11pqg.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11sdr.o: cc $
+    ../../lib/pk11wrap/pk11sdr.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11skey.o: cc $
+    ../../lib/pk11wrap/pk11skey.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11slot.o: cc $
+    ../../lib/pk11wrap/pk11slot.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/pk11wrap/pk11wrap_static.pk11util.o: cc $
+    ../../lib/pk11wrap/pk11util.c || obj/nss_exports.compile_depends.stamp
+
+build libpk11wrap_static.a: alink $
+    obj/lib/pk11wrap/pk11wrap_static.dev3hack.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11akey.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11auth.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11cert.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11cxt.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11err.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11kea.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11list.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11load.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11mech.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11merge.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11nobj.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11obj.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11pars.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11pbe.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11pk12.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11pqg.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11sdr.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11skey.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11slot.o $
+    obj/lib/pk11wrap/pk11wrap_static.pk11util.o || $
+    obj/nss_exports.actions_depends.stamp

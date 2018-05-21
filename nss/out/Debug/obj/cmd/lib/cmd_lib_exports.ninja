@@ -1,0 +1,11 @@
+build /home/work/Documents/tls_middlebox/dist/private/nss/basicutil.h: copy $
+    ../../cmd/lib/basicutil.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pk11table.h: copy $
+    ../../cmd/lib/pk11table.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/secutil.h: copy $
+    ../../cmd/lib/secutil.h
+build obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/basicutil.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pk11table.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/secutil.h
+

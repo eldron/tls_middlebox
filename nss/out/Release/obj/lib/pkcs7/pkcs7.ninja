@@ -1,0 +1,33 @@
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/pkcs7/pkcs7.certread.o: cc ../../lib/pkcs7/certread.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/pkcs7/pkcs7.p7common.o: cc ../../lib/pkcs7/p7common.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/pkcs7/pkcs7.p7create.o: cc ../../lib/pkcs7/p7create.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/pkcs7/pkcs7.p7decode.o: cc ../../lib/pkcs7/p7decode.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/pkcs7/pkcs7.p7encode.o: cc ../../lib/pkcs7/p7encode.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/pkcs7/pkcs7.p7local.o: cc ../../lib/pkcs7/p7local.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/pkcs7/pkcs7.secmime.o: cc ../../lib/pkcs7/secmime.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libpkcs7.a: alink obj/lib/pkcs7/pkcs7.certread.o $
+    obj/lib/pkcs7/pkcs7.p7common.o obj/lib/pkcs7/pkcs7.p7create.o $
+    obj/lib/pkcs7/pkcs7.p7decode.o obj/lib/pkcs7/pkcs7.p7encode.o $
+    obj/lib/pkcs7/pkcs7.p7local.o obj/lib/pkcs7/pkcs7.secmime.o || $
+    obj/nss_exports.actions_depends.stamp

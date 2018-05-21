@@ -1,0 +1,32 @@
+build obj/nss_static_libs.actions_depends.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsectool.a $
+    libnssb.a libcertdb.a libcerthi.a libnssckfw.a libcrmf.a libcryptohi.a $
+    libnssdev.a libfreebl.a libjar.a libnss_static.a libpk11wrap.a $
+    libpkcs12.a libpkcs7.a libnsspki.a libsmime.a libsoftokn.a libssl.a $
+    libnssutil.a libnsssysinit_static.a libdbm.a libnssdbm.a libsqlite.a
+
+build obj/nss_static_libs.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/softoken/softokn.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/sysinit/nsssysinit_static.compile_depends.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp
+

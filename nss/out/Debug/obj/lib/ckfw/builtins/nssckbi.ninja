@@ -1,0 +1,174 @@
+build obj/lib/ckfw/builtins/nssckbi.actions_depends.stamp: stamp $
+    obj/nss_exports.actions_depends.stamp libnssckfw.a libnssb.a $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp
+
+build obj/lib/ckfw/builtins/nssckbi.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp
+
+rule nssckbi_target_generate_certdata_c_61ec98349dbf3862303940d47ec710bc
+  command = cd ../../lib/ckfw/builtins; python certdata.py certdata.txt $
+      ../../../out/Debug/obj/lib/ckfw/builtins/nssckbi.gen/certdata.c
+  description = ACTION nssckbi: $
+      generate_certdata_c_61ec98349dbf3862303940d47ec710bc
+  restat = 1
+
+build obj/lib/ckfw/builtins/nssckbi.gen/certdata.c: $
+    nssckbi_target_generate_certdata_c_61ec98349dbf3862303940d47ec710bc $
+    ../../lib/ckfw/builtins/certdata.py $
+    ../../lib/ckfw/builtins/certdata.perl $
+    ../../lib/ckfw/builtins/certdata.txt || $
+    obj/lib/ckfw/builtins/nssckbi.actions_depends.stamp
+
+rule nssckbi_target_generate_mapfile_61ec98349dbf3862303940d47ec710bc
+  command = cd ../../lib/ckfw/builtins; /bin/sh -c "/usr/bin/env grep -v $
+      \";-\" nssckbi.def | sed -e \"s,;+,,\" -e \"s; DATA ;;\" -e $
+      \"s,;;,,\" -e \"s,;.*,;,\" > $
+      \"../../../out/Debug/obj/lib/ckfw/builtins/nssckbi.gen/out.nssckbi.def\""
+  description = ACTION nssckbi: $
+      generate_mapfile_61ec98349dbf3862303940d47ec710bc
+  restat = 1
+
+build obj/lib/ckfw/builtins/nssckbi.gen/out.nssckbi.def: $
+    nssckbi_target_generate_mapfile_61ec98349dbf3862303940d47ec710bc $
+    ../../lib/ckfw/builtins/nssckbi.def || $
+    obj/lib/ckfw/builtins/nssckbi.actions_depends.stamp
+
+build obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp: stamp $
+    obj/lib/ckfw/builtins/nssckbi.gen/certdata.c $
+    obj/lib/ckfw/builtins/nssckbi.gen/out.nssckbi.def
+
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DDEBUG
+includes = -I../../lib/ckfw/builtins $
+    -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O0 -g -gdwarf-2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/ckfw/builtins/nssckbi.anchor.o: cc $
+    ../../lib/ckfw/builtins/anchor.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.bfind.o: cc $
+    ../../lib/ckfw/builtins/bfind.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.binst.o: cc $
+    ../../lib/ckfw/builtins/binst.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.bobject.o: cc $
+    ../../lib/ckfw/builtins/bobject.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.bsession.o: cc $
+    ../../lib/ckfw/builtins/bsession.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.bslot.o: cc $
+    ../../lib/ckfw/builtins/bslot.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.btoken.o: cc $
+    ../../lib/ckfw/builtins/btoken.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.ckbiver.o: cc $
+    ../../lib/ckfw/builtins/ckbiver.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/lib/ckfw/builtins/nssckbi.constants.o: cc $
+    ../../lib/ckfw/builtins/constants.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build $
+    obj/lib/ckfw/builtins/obj/lib/ckfw/builtins/nssckbi.gen/nssckbi.certdata.o: $
+    cc obj/lib/ckfw/builtins/nssckbi.gen/certdata.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+build obj/coreconf/nssckbi.empty.o: cc ../../coreconf/empty.c || $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp
+
+ldflags = $
+    -Wl,--version-script,obj/lib/ckfw/builtins/nssckbi.gen/out.nssckbi.def $
+    -Wl,--gc-sections -Wl,-z,defs -z noexecstack -m64
+libs = -L/home/work/Documents/tls_middlebox/dist/Debug/lib -lpthread -ldl $
+    -lc -lplds4 -lplc4 -lnspr4
+build /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so.TOC: $
+    solink obj/lib/ckfw/builtins/nssckbi.anchor.o $
+    obj/lib/ckfw/builtins/nssckbi.bfind.o $
+    obj/lib/ckfw/builtins/nssckbi.binst.o $
+    obj/lib/ckfw/builtins/nssckbi.bobject.o $
+    obj/lib/ckfw/builtins/nssckbi.bsession.o $
+    obj/lib/ckfw/builtins/nssckbi.bslot.o $
+    obj/lib/ckfw/builtins/nssckbi.btoken.o $
+    obj/lib/ckfw/builtins/nssckbi.ckbiver.o $
+    obj/lib/ckfw/builtins/nssckbi.constants.o $
+    obj/lib/ckfw/builtins/obj/lib/ckfw/builtins/nssckbi.gen/nssckbi.certdata.o $
+    obj/coreconf/nssckbi.empty.o libnssckfw.a libnssb.a | $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/nss_exports.actions_depends.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp
+  soname = libnssckbi.so
+  lib = /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so
+  link_file_list = $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so.rsp

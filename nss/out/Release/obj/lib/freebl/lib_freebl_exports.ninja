@@ -1,0 +1,48 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/blapit.h: copy $
+    ../../lib/freebl/blapit.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/ecl-exp.h: copy $
+    ../../lib/freebl/ecl/ecl-exp.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/shsign.h: copy $
+    ../../lib/freebl/shsign.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nsslowhash.h: copy $
+    ../../lib/freebl/nsslowhash.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/alghmac.h: copy $
+    ../../lib/freebl/alghmac.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/blapi.h: copy $
+    ../../lib/freebl/blapi.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/blake2b.h: copy $
+    ../../lib/freebl/blake2b.h
+build $
+    /home/work/Documents/tls_middlebox/dist/private/nss/chacha20poly1305.h: $
+    copy ../../lib/freebl/chacha20poly1305.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ec.h: copy $
+    ../../lib/freebl/ec.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ecl-curve.h: copy $
+    ../../lib/freebl/ecl/ecl-curve.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ecl.h: copy $
+    ../../lib/freebl/ecl/ecl.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/eclt.h: copy $
+    ../../lib/freebl/ecl/eclt.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/hmacct.h: copy $
+    ../../lib/freebl/hmacct.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/secmpi.h: copy $
+    ../../lib/freebl/secmpi.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/secrng.h: copy $
+    ../../lib/freebl/secrng.h
+build obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/blapit.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/ecl-exp.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/shsign.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nsslowhash.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/alghmac.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/blapi.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/blake2b.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/chacha20poly1305.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ec.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ecl-curve.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ecl.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/eclt.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/hmacct.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/secmpi.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/secrng.h
+

@@ -1,0 +1,288 @@
+build obj/gtests/ssl_gtest/ssl_gtest.actions_depends.stamp: stamp $
+    obj/nss_exports.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC $
+    libgtest.a libsmime.a libssl.a libnss_static.a libpkcs12.a libpkcs7.a $
+    libcerthi.a libcryptohi.a libcertdb.a libnsspki.a libnssdev.a libnssb.a $
+    libcpputil.a $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so.TOC $
+    libpk11wrap.a libsoftokn.a libfreebl.a libdbm.a $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+
+build obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/util/nssutil3.gen/out.nssutil.def $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/sqlite/sqlite3.gen/out.sqlite.def $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/softoken/softokn.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+
+defines = -DNSS_USE_STATIC_LIBS -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT $
+    -DNSS_X86_OR_X64 -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY $
+    -DNO_NSPR_10_SUPPORT -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES $
+    -DLINUX2_1 -DLINUX -Dlinux -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT $
+    -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I../../lib/ssl $
+    -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I../../gtests/google_test/gtest/include -I../../gtests/common $
+    -I../../cpputil -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -Wsign-compare -fPIC -pipe -ffunction-sections -fdata-sections $
+    -m64 -Werror -Wall -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/gtests/ssl_gtest/ssl_gtest.bloomfilter_unittest.o: cxx $
+    ../../gtests/ssl_gtest/bloomfilter_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.libssl_internals.o: cc $
+    ../../gtests/ssl_gtest/libssl_internals.c || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.selfencrypt_unittest.o: cxx $
+    ../../gtests/ssl_gtest/selfencrypt_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_0rtt_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_0rtt_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_agent_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_agent_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_auth_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_auth_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_cert_ext_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_cert_ext_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_ciphersuite_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_ciphersuite_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_custext_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_custext_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_damage_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_damage_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_dhe_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_dhe_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_drop_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_drop_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_ecdh_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_ecdh_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_ems_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_ems_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_exporter_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_exporter_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_extension_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_extension_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_fuzz_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_fuzz_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_fragment_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_fragment_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_gather_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_gather_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_gtest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_gtest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_hrr_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_hrr_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_keylog_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_keylog_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_keyupdate_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_keyupdate_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_loopback_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_loopback_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_misc_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_misc_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_record_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_record_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_resumption_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_resumption_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_renegotiation_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_renegotiation_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_skip_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_skip_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_staticrsa_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_staticrsa_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_tls13compat_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_tls13compat_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_v2_client_hello_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_v2_client_hello_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_version_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_version_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.ssl_versionpolicy_unittest.o: cxx $
+    ../../gtests/ssl_gtest/ssl_versionpolicy_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.test_io.o: cxx $
+    ../../gtests/ssl_gtest/test_io.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.tls_agent.o: cxx $
+    ../../gtests/ssl_gtest/tls_agent.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.tls_connect.o: cxx $
+    ../../gtests/ssl_gtest/tls_connect.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.tls_filter.o: cxx $
+    ../../gtests/ssl_gtest/tls_filter.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.tls_hkdf_unittest.o: cxx $
+    ../../gtests/ssl_gtest/tls_hkdf_unittest.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+build obj/gtests/ssl_gtest/ssl_gtest.tls_protect.o: cxx $
+    ../../gtests/ssl_gtest/tls_protect.cc || $
+    obj/gtests/ssl_gtest/ssl_gtest.compile_depends.stamp
+
+ldflags = -z noexecstack -m64 -Wl,-rpath=\$$ORIGIN/lib/ -Wl,-rpath-link=lib/
+libs = -L/home/work/Documents/tls_middlebox/dist/Debug/lib -lpthread -ldl $
+    -lc -lz -lplds4 -lplc4 -lnspr4
+build /home/work/Documents/tls_middlebox/dist/Debug/bin/ssl_gtest: link $
+    obj/gtests/ssl_gtest/ssl_gtest.bloomfilter_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.libssl_internals.o $
+    obj/gtests/ssl_gtest/ssl_gtest.selfencrypt_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_0rtt_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_agent_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_auth_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_cert_ext_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_ciphersuite_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_custext_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_damage_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_dhe_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_drop_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_ecdh_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_ems_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_exporter_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_extension_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_fuzz_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_fragment_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_gather_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_gtest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_hrr_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_keylog_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_keyupdate_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_loopback_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_misc_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_record_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_resumption_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_renegotiation_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_skip_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_staticrsa_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_tls13compat_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_v2_client_hello_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_version_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.ssl_versionpolicy_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.test_io.o $
+    obj/gtests/ssl_gtest/ssl_gtest.tls_agent.o $
+    obj/gtests/ssl_gtest/ssl_gtest.tls_connect.o $
+    obj/gtests/ssl_gtest/ssl_gtest.tls_filter.o $
+    obj/gtests/ssl_gtest/ssl_gtest.tls_hkdf_unittest.o $
+    obj/gtests/ssl_gtest/ssl_gtest.tls_protect.o libgtest.a libsmime.a $
+    libssl.a libnss_static.a libpkcs12.a libpkcs7.a libcerthi.a $
+    libcryptohi.a libcertdb.a libnsspki.a libnssdev.a libnssb.a $
+    libcpputil.a libpk11wrap.a libsoftokn.a libfreebl.a libdbm.a | $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/nss_exports.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so.TOC $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp
+  ld = $ldxx
+  solibs = /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so

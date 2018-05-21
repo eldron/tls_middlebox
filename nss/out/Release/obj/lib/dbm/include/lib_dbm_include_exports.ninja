@@ -1,0 +1,30 @@
+build /home/work/Documents/tls_middlebox/dist/public/dbm/mcom_db.h: copy $
+    ../../lib/dbm/include/mcom_db.h
+build /home/work/Documents/tls_middlebox/dist/public/dbm/ncompat.h: copy $
+    ../../lib/dbm/include/ncompat.h
+build /home/work/Documents/tls_middlebox/dist/public/dbm/winfile.h: copy $
+    ../../lib/dbm/include/winfile.h
+build /home/work/Documents/tls_middlebox/dist/private/dbm/extern.h: copy $
+    ../../lib/dbm/include/extern.h
+build /home/work/Documents/tls_middlebox/dist/private/dbm/hash.h: copy $
+    ../../lib/dbm/include/hash.h
+build /home/work/Documents/tls_middlebox/dist/private/dbm/hsearch.h: copy $
+    ../../lib/dbm/include/hsearch.h
+build /home/work/Documents/tls_middlebox/dist/private/dbm/page.h: copy $
+    ../../lib/dbm/include/page.h
+build /home/work/Documents/tls_middlebox/dist/private/dbm/queue.h: copy $
+    ../../lib/dbm/include/queue.h
+build /home/work/Documents/tls_middlebox/dist/private/dbm/search.h: copy $
+    ../../lib/dbm/include/search.h
+build $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp: $
+    stamp /home/work/Documents/tls_middlebox/dist/public/dbm/mcom_db.h $
+    /home/work/Documents/tls_middlebox/dist/public/dbm/ncompat.h $
+    /home/work/Documents/tls_middlebox/dist/public/dbm/winfile.h $
+    /home/work/Documents/tls_middlebox/dist/private/dbm/extern.h $
+    /home/work/Documents/tls_middlebox/dist/private/dbm/hash.h $
+    /home/work/Documents/tls_middlebox/dist/private/dbm/hsearch.h $
+    /home/work/Documents/tls_middlebox/dist/private/dbm/page.h $
+    /home/work/Documents/tls_middlebox/dist/private/dbm/queue.h $
+    /home/work/Documents/tls_middlebox/dist/private/dbm/search.h
+

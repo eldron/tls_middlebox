@@ -1,0 +1,31 @@
+defines = -DMOZILLA_CLIENT=1 -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT $
+    -DNSS_X86_OR_X64 -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY $
+    -DNO_NSPR_10_SUPPORT -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES $
+    -DLINUX2_1 -DLINUX -Dlinux -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT $
+    -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/jar/jar.jar-ds.o: cc ../../lib/jar/jar-ds.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/jar/jar.jar.o: cc ../../lib/jar/jar.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/jar/jar.jarfile.o: cc ../../lib/jar/jarfile.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/jar/jar.jarint.o: cc ../../lib/jar/jarint.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/jar/jar.jarsign.o: cc ../../lib/jar/jarsign.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/jar/jar.jarver.o: cc ../../lib/jar/jarver.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libjar.a: alink obj/lib/jar/jar.jar-ds.o obj/lib/jar/jar.jar.o $
+    obj/lib/jar/jar.jarfile.o obj/lib/jar/jar.jarint.o $
+    obj/lib/jar/jar.jarsign.o obj/lib/jar/jar.jarver.o || $
+    obj/nss_exports.actions_depends.stamp

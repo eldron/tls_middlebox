@@ -1,0 +1,112 @@
+build obj/lib/sqlite/sqlite3.actions_depends.stamp: stamp libsqlite.a $
+    obj/nss_exports.actions_depends.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp
+
+build obj/lib/sqlite/sqlite3.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp
+
+rule sqlite3_target_generate_mapfile_00239446d91d254e63374d840d84d25f
+  command = cd ../../lib/sqlite; /bin/sh -c "/usr/bin/env grep -v \";-\" $
+      sqlite.def | sed -e \"s,;+,,\" -e \"s; DATA ;;\" -e \"s,;;,,\" -e $
+      \"s,;.*,;,\" > $
+      \"../../out/Release/obj/lib/sqlite/sqlite3.gen/out.sqlite.def\""
+  description = ACTION sqlite3: $
+      generate_mapfile_00239446d91d254e63374d840d84d25f
+  restat = 1
+
+build obj/lib/sqlite/sqlite3.gen/out.sqlite.def: $
+    sqlite3_target_generate_mapfile_00239446d91d254e63374d840d84d25f $
+    ../../lib/sqlite/sqlite.def || $
+    obj/lib/sqlite/sqlite3.actions_depends.stamp
+
+defines = -DSQLITE_THREADSAFE=1 -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT $
+    -DNSS_X86_OR_X64 -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY $
+    -DNO_NSPR_10_SUPPORT -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES $
+    -DLINUX2_1 -DLINUX -Dlinux -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT $
+    -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/coreconf/sqlite3.empty.o: cc ../../coreconf/empty.c || $
+    obj/lib/sqlite/sqlite3.gen/out.sqlite.def
+
+ldflags = -Wl,--version-script,obj/lib/sqlite/sqlite3.gen/out.sqlite.def $
+    -Wl,--gc-sections -Wl,-z,defs -z noexecstack -m64
+libs = -L/home/work/Documents/tls_middlebox/dist/Debug/lib -lpthread -ldl $
+    -lc -lplds4 -lplc4 -lnspr4
+build /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so.TOC: $
+    solink obj/coreconf/sqlite3.empty.o libsqlite.a | $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/nss_exports.actions_depends.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp
+  soname = libsqlite3.so
+  lib = /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so
+  link_file_list = $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so.rsp

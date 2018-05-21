@@ -1,0 +1,25 @@
+build obj/nss_libs.actions_depends.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssckbi.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnss3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsmime3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsqlite3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libssl3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so.TOC $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.so.TOC
+
+build obj/nss_libs.compile_depends.stamp: stamp $
+    obj/lib/ckfw/builtins/nssckbi.actions_rules_copies.stamp $
+    obj/lib/freebl/freebl3.gen/out.freebl_hash.def $
+    obj/lib/softoken/softokn3.gen/out.softokn.def $
+    obj/lib/nss/nss3.gen/out.nss.def obj/lib/smime/smime3.gen/out.smime.def $
+    obj/lib/sqlite/sqlite3.gen/out.sqlite.def $
+    obj/lib/ssl/ssl3.gen/out.ssl.def $
+    obj/lib/util/nssutil3.gen/out.nssutil.def $
+    obj/lib/freebl/freeblpriv3.gen/out.freebl_hash_vector.def $
+    obj/lib/sysinit/nsssysinit.compile_depends.stamp $
+    obj/lib/softoken/legacydb/nssdbm3.gen/out.nssdbm.def
+

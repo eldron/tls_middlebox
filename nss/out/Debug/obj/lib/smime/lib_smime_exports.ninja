@@ -1,0 +1,17 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/cms.h: copy $
+    ../../lib/smime/cms.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/cmsreclist.h: copy $
+    ../../lib/smime/cmsreclist.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/cmst.h: copy $
+    ../../lib/smime/cmst.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/smime.h: copy $
+    ../../lib/smime/smime.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/cmslocal.h: copy $
+    ../../lib/smime/cmslocal.h
+build obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/cms.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/cmsreclist.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/cmst.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/smime.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/cmslocal.h
+

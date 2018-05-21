@@ -1,0 +1,28 @@
+build obj/lib/sysinit/nsssysinit_static.actions_depends.stamp: stamp $
+    obj/nss_exports.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC
+
+build obj/lib/sysinit/nsssysinit_static.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/lib/util/nssutil3.gen/out.nssutil.def
+
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/sysinit/nsssysinit_static.nsssysinit.o: cc $
+    ../../lib/sysinit/nsssysinit.c || $
+    obj/lib/sysinit/nsssysinit_static.compile_depends.stamp
+
+build libnsssysinit_static.a: alink $
+    obj/lib/sysinit/nsssysinit_static.nsssysinit.o || $
+    obj/lib/sysinit/nsssysinit_static.actions_depends.stamp

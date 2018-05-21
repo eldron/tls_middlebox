@@ -1,0 +1,45 @@
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/certdb/certdb.alg1485.o: cc ../../lib/certdb/alg1485.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.certdb.o: cc ../../lib/certdb/certdb.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.certv3.o: cc ../../lib/certdb/certv3.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.certxutl.o: cc ../../lib/certdb/certxutl.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.crl.o: cc ../../lib/certdb/crl.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.genname.o: cc ../../lib/certdb/genname.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.polcyxtn.o: cc ../../lib/certdb/polcyxtn.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.secname.o: cc ../../lib/certdb/secname.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.stanpcertdb.o: cc $
+    ../../lib/certdb/stanpcertdb.c || obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.xauthkid.o: cc ../../lib/certdb/xauthkid.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.xbsconst.o: cc ../../lib/certdb/xbsconst.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/certdb/certdb.xconst.o: cc ../../lib/certdb/xconst.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libcertdb.a: alink obj/lib/certdb/certdb.alg1485.o $
+    obj/lib/certdb/certdb.certdb.o obj/lib/certdb/certdb.certv3.o $
+    obj/lib/certdb/certdb.certxutl.o obj/lib/certdb/certdb.crl.o $
+    obj/lib/certdb/certdb.genname.o obj/lib/certdb/certdb.polcyxtn.o $
+    obj/lib/certdb/certdb.secname.o obj/lib/certdb/certdb.stanpcertdb.o $
+    obj/lib/certdb/certdb.xauthkid.o obj/lib/certdb/certdb.xbsconst.o $
+    obj/lib/certdb/certdb.xconst.o || obj/nss_exports.actions_depends.stamp

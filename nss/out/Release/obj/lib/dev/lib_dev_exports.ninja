@@ -1,0 +1,23 @@
+build /home/work/Documents/tls_middlebox/dist/private/nss/ckhelper.h: copy $
+    ../../lib/dev/ckhelper.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/dev.h: copy $
+    ../../lib/dev/dev.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/devm.h: copy $
+    ../../lib/dev/devm.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/devt.h: copy $
+    ../../lib/dev/devt.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/devtm.h: copy $
+    ../../lib/dev/devtm.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/nssdev.h: copy $
+    ../../lib/dev/nssdev.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/nssdevt.h: copy $
+    ../../lib/dev/nssdevt.h
+build obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ckhelper.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/dev.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/devm.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/devt.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/devtm.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/nssdev.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/nssdevt.h
+

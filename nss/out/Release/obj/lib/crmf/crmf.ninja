@@ -1,0 +1,58 @@
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/crmf/crmf.asn1cmn.o: cc ../../lib/crmf/asn1cmn.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.challcli.o: cc ../../lib/crmf/challcli.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.cmmfasn1.o: cc ../../lib/crmf/cmmfasn1.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.cmmfchal.o: cc ../../lib/crmf/cmmfchal.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.cmmfrec.o: cc ../../lib/crmf/cmmfrec.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.cmmfresp.o: cc ../../lib/crmf/cmmfresp.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmfcont.o: cc ../../lib/crmf/crmfcont.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmfdec.o: cc ../../lib/crmf/crmfdec.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmfenc.o: cc ../../lib/crmf/crmfenc.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmfget.o: cc ../../lib/crmf/crmfget.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmfpop.o: cc ../../lib/crmf/crmfpop.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmfreq.o: cc ../../lib/crmf/crmfreq.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.crmftmpl.o: cc ../../lib/crmf/crmftmpl.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.encutil.o: cc ../../lib/crmf/encutil.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.respcli.o: cc ../../lib/crmf/respcli.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.respcmn.o: cc ../../lib/crmf/respcmn.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/crmf/crmf.servget.o: cc ../../lib/crmf/servget.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libcrmf.a: alink obj/lib/crmf/crmf.asn1cmn.o $
+    obj/lib/crmf/crmf.challcli.o obj/lib/crmf/crmf.cmmfasn1.o $
+    obj/lib/crmf/crmf.cmmfchal.o obj/lib/crmf/crmf.cmmfrec.o $
+    obj/lib/crmf/crmf.cmmfresp.o obj/lib/crmf/crmf.crmfcont.o $
+    obj/lib/crmf/crmf.crmfdec.o obj/lib/crmf/crmf.crmfenc.o $
+    obj/lib/crmf/crmf.crmfget.o obj/lib/crmf/crmf.crmfpop.o $
+    obj/lib/crmf/crmf.crmfreq.o obj/lib/crmf/crmf.crmftmpl.o $
+    obj/lib/crmf/crmf.encutil.o obj/lib/crmf/crmf.respcli.o $
+    obj/lib/crmf/crmf.respcmn.o obj/lib/crmf/crmf.servget.o || $
+    obj/nss_exports.actions_depends.stamp

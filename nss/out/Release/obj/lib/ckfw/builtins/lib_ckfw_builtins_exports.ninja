@@ -1,0 +1,2 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h: copy $
+    ../../lib/ckfw/builtins/nssckbi.h

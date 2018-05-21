@@ -1,0 +1,85 @@
+build obj/lib/sysinit/nsssysinit.actions_depends.stamp: stamp $
+    libnsssysinit_static.a obj/nss_exports.actions_depends.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC
+
+build obj/lib/sysinit/nsssysinit.compile_depends.stamp: stamp $
+    obj/lib/sysinit/nsssysinit_static.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/lib/util/nssutil3.gen/out.nssutil.def
+
+ldflags = -Wl,--gc-sections -Wl,-z,defs -z noexecstack -m64
+libs = -L/home/work/Documents/tls_middlebox/dist/Debug/lib -lpthread -ldl $
+    -lc -lplds4 -lplc4 -lnspr4
+build /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so.TOC: $
+    solink libnsssysinit_static.a | $
+    obj/lib/freebl/lib_freebl_exports.actions_rules_copies.stamp $
+    obj/lib/cryptohi/lib_cryptohi_exports.actions_rules_copies.stamp $
+    obj/nss_exports.actions_depends.stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC $
+    obj/lib/base/lib_base_exports.actions_rules_copies.stamp $
+    obj/lib/dev/lib_dev_exports.actions_rules_copies.stamp $
+    obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp $
+    obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp $
+    obj/lib/certhigh/lib_certhigh_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h $
+    obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp $
+    obj/lib/util/lib_util_exports.actions_rules_copies.stamp $
+    obj/cmd/lib/cmd_lib_exports.actions_rules_copies.stamp $
+    obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp $
+    obj/lib/smime/lib_smime_exports.actions_rules_copies.stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckbi.h $
+    obj/lib/softoken/lib_softoken_exports.actions_rules_copies.stamp $
+    obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs12/lib_pkcs12_exports.actions_rules_copies.stamp $
+    obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp $
+    obj/lib/pk11wrap/lib_pk11wrap_exports.actions_rules_copies.stamp $
+    obj/lib/crmf/lib_crmf_exports.actions_rules_copies.stamp $
+    obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp
+  soname = libnsssysinit.so
+  lib = /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so
+  link_file_list = $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libnsssysinit.so.rsp
+  solibs = /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so

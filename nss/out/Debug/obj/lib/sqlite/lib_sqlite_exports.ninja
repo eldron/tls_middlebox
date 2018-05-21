@@ -1,0 +1,2 @@
+build /home/work/Documents/tls_middlebox/dist/private/nss/sqlite3.h: copy $
+    ../../lib/sqlite/sqlite3.h

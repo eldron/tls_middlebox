@@ -1,0 +1,20 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/preenc.h: copy $
+    ../../lib/ssl/preenc.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/ssl.h: copy $
+    ../../lib/ssl/ssl.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/sslerr.h: copy $
+    ../../lib/ssl/sslerr.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/sslexp.h: copy $
+    ../../lib/ssl/sslexp.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/sslproto.h: copy $
+    ../../lib/ssl/sslproto.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/sslt.h: copy $
+    ../../lib/ssl/sslt.h
+build obj/lib/ssl/lib_ssl_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/preenc.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/ssl.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/sslerr.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/sslexp.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/sslproto.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/sslt.h
+

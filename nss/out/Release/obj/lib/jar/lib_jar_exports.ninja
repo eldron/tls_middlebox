@@ -1,0 +1,11 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/jar-ds.h: copy $
+    ../../lib/jar/jar-ds.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/jar.h: copy $
+    ../../lib/jar/jar.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/jarfile.h: copy $
+    ../../lib/jar/jarfile.h
+build obj/lib/jar/lib_jar_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/jar-ds.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/jar.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/jarfile.h
+

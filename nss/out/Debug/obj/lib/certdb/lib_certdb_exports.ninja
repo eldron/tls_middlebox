@@ -1,0 +1,23 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/cert.h: copy $
+    ../../lib/certdb/cert.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/certdb.h: copy $
+    ../../lib/certdb/certdb.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/certt.h: copy $
+    ../../lib/certdb/certt.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/certi.h: copy $
+    ../../lib/certdb/certi.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/certxutl.h: copy $
+    ../../lib/certdb/certxutl.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/genname.h: copy $
+    ../../lib/certdb/genname.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/xconst.h: copy $
+    ../../lib/certdb/xconst.h
+build obj/lib/certdb/lib_certdb_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/cert.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/certdb.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/certt.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/certi.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/certxutl.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/genname.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/xconst.h
+

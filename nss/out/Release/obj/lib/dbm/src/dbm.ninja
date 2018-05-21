@@ -1,0 +1,40 @@
+defines = -DSTDC_HEADERS -DHAVE_STRERROR -DHAVE_SNPRINTF -DMEMMOVE $
+    -D__DBINTERFACE_PRIVATE -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT $
+    -DNSS_X86_OR_X64 -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY $
+    -DNO_NSPR_10_SUPPORT -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES $
+    -DLINUX2_1 -DLINUX -Dlinux -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX $
+    -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/dbm $
+    -I/home/work/Documents/tls_middlebox/dist/public/dbm
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/dbm/src/dbm.db.o: cc ../../lib/dbm/src/db.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.dirent.o: cc ../../lib/dbm/src/dirent.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.h_bigkey.o: cc ../../lib/dbm/src/h_bigkey.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.h_func.o: cc ../../lib/dbm/src/h_func.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.h_log2.o: cc ../../lib/dbm/src/h_log2.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.h_page.o: cc ../../lib/dbm/src/h_page.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.hash.o: cc ../../lib/dbm/src/hash.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.hash_buf.o: cc ../../lib/dbm/src/hash_buf.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+build obj/lib/dbm/src/dbm.mktemp.o: cc ../../lib/dbm/src/mktemp.c || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp
+
+build libdbm.a: alink obj/lib/dbm/src/dbm.db.o obj/lib/dbm/src/dbm.dirent.o $
+    obj/lib/dbm/src/dbm.h_bigkey.o obj/lib/dbm/src/dbm.h_func.o $
+    obj/lib/dbm/src/dbm.h_log2.o obj/lib/dbm/src/dbm.h_page.o $
+    obj/lib/dbm/src/dbm.hash.o obj/lib/dbm/src/dbm.hash_buf.o $
+    obj/lib/dbm/src/dbm.mktemp.o || $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp

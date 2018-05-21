@@ -1,0 +1,8 @@
+build obj/lib/smime/smime3_deps.actions_depends.stamp: stamp libsmime.a $
+    libpkcs12.a libpkcs7.a
+
+build obj/lib/smime/smime3_deps.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp
+

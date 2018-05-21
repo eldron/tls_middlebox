@@ -1,0 +1,85 @@
+defines = -DNSS_FIPS_DISABLED -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 $
+    -DNSS_X64 -DNSS_USE_64 -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DNDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/util/nssutil.derdec.o: cc ../../lib/util/derdec.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.derenc.o: cc ../../lib/util/derenc.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.dersubr.o: cc ../../lib/util/dersubr.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.dertime.o: cc ../../lib/util/dertime.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.errstrs.o: cc ../../lib/util/errstrs.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.nssb64d.o: cc ../../lib/util/nssb64d.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.nssb64e.o: cc ../../lib/util/nssb64e.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.nssilock.o: cc ../../lib/util/nssilock.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.nssrwlk.o: cc ../../lib/util/nssrwlk.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.oidstring.o: cc ../../lib/util/oidstring.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.pkcs1sig.o: cc ../../lib/util/pkcs1sig.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.pkcs11uri.o: cc ../../lib/util/pkcs11uri.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.portreg.o: cc ../../lib/util/portreg.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.quickder.o: cc ../../lib/util/quickder.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secalgid.o: cc ../../lib/util/secalgid.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secasn1d.o: cc ../../lib/util/secasn1d.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secasn1e.o: cc ../../lib/util/secasn1e.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secasn1u.o: cc ../../lib/util/secasn1u.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secdig.o: cc ../../lib/util/secdig.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secitem.o: cc ../../lib/util/secitem.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secload.o: cc ../../lib/util/secload.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secoid.o: cc ../../lib/util/secoid.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.secport.o: cc ../../lib/util/secport.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.sectime.o: cc ../../lib/util/sectime.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.templates.o: cc ../../lib/util/templates.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.utf8.o: cc ../../lib/util/utf8.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.utilmod.o: cc ../../lib/util/utilmod.c || $
+    obj/nss_exports.compile_depends.stamp
+build obj/lib/util/nssutil.utilpars.o: cc ../../lib/util/utilpars.c || $
+    obj/nss_exports.compile_depends.stamp
+
+build libnssutil.a: alink obj/lib/util/nssutil.derdec.o $
+    obj/lib/util/nssutil.derenc.o obj/lib/util/nssutil.dersubr.o $
+    obj/lib/util/nssutil.dertime.o obj/lib/util/nssutil.errstrs.o $
+    obj/lib/util/nssutil.nssb64d.o obj/lib/util/nssutil.nssb64e.o $
+    obj/lib/util/nssutil.nssilock.o obj/lib/util/nssutil.nssrwlk.o $
+    obj/lib/util/nssutil.oidstring.o obj/lib/util/nssutil.pkcs1sig.o $
+    obj/lib/util/nssutil.pkcs11uri.o obj/lib/util/nssutil.portreg.o $
+    obj/lib/util/nssutil.quickder.o obj/lib/util/nssutil.secalgid.o $
+    obj/lib/util/nssutil.secasn1d.o obj/lib/util/nssutil.secasn1e.o $
+    obj/lib/util/nssutil.secasn1u.o obj/lib/util/nssutil.secdig.o $
+    obj/lib/util/nssutil.secitem.o obj/lib/util/nssutil.secload.o $
+    obj/lib/util/nssutil.secoid.o obj/lib/util/nssutil.secport.o $
+    obj/lib/util/nssutil.sectime.o obj/lib/util/nssutil.templates.o $
+    obj/lib/util/nssutil.utf8.o obj/lib/util/nssutil.utilmod.o $
+    obj/lib/util/nssutil.utilpars.o || obj/nss_exports.actions_depends.stamp

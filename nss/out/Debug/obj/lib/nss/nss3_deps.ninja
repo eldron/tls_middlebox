@@ -1,0 +1,14 @@
+build obj/lib/nss/nss3_deps.actions_depends.stamp: stamp libnss_static.a $
+    libcerthi.a libcryptohi.a libpk11wrap.a libcertdb.a libnsspki.a $
+    libnssdev.a libnssb.a
+
+build obj/lib/nss/nss3_deps.compile_depends.stamp: stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp
+

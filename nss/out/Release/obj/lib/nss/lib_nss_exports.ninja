@@ -1,0 +1,11 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/nss.h: copy $
+    ../../lib/nss/nss.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/nssoptions.h: $
+    copy ../../lib/nss/nssoptions.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/nssrenam.h: copy $
+    ../../lib/nss/nssrenam.h
+build obj/lib/nss/lib_nss_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nss.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/nssoptions.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/nssrenam.h
+

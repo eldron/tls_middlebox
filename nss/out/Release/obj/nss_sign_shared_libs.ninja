@@ -1,0 +1,27 @@
+rule nss_sign_shared_libs_target_shlibsign_29fc8a445570a0d3fc8010cc12fca598
+  command = cd ../../; python ./coreconf/shlibsign.py $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.so $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.so $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.so $
+      /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.so
+  description = ACTION nss_sign_shared_libs: $
+      shlibsign_29fc8a445570a0d3fc8010cc12fca598
+  restat = 1
+
+build /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.chk $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.chk $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.chk $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.chk: $
+    nss_sign_shared_libs_target_shlibsign_29fc8a445570a0d3fc8010cc12fca598 $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.so $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.so || $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/shlibsign
+
+build obj/nss_sign_shared_libs.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreebl3.chk $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libfreeblpriv3.chk $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssdbm3.chk $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libsoftokn3.chk
+

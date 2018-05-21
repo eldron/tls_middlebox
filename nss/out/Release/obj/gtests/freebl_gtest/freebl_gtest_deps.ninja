@@ -1,0 +1,18 @@
+build obj/gtests/freebl_gtest/freebl_gtest_deps.actions_depends.stamp: $
+    stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so.TOC $
+    libgtest.a libnss_static.a libpk11wrap_static.a libcryptohi.a $
+    libcerthi.a libcertdb.a libnssb.a libnssdev.a libnsspki.a libssl.a
+
+build obj/gtests/freebl_gtest/freebl_gtest_deps.compile_depends.stamp: $
+    stamp obj/lib/util/nssutil3.gen/out.nssutil.def $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp $
+    obj/nss_exports.compile_depends.stamp
+

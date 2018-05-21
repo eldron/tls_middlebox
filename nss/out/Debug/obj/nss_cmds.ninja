@@ -1,0 +1,30 @@
+build obj/nss_cmds.actions_depends.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/certutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/modutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pk12util $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/shlibsign $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/crlutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/pwdecrypt $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/signtool $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/signver $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/cmsutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/ssltap $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/symkeyutil $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/nss $
+    /home/work/Documents/tls_middlebox/dist/Debug/bin/hw-support
+
+build obj/nss_cmds.compile_depends.stamp: stamp $
+    obj/cmd/certutil/certutil.compile_depends.stamp $
+    obj/cmd/modutil/modutil.compile_depends.stamp $
+    obj/cmd/pk12util/pk12util.compile_depends.stamp $
+    obj/cmd/shlibsign/shlibsign.compile_depends.stamp $
+    obj/cmd/crlutil/crlutil.compile_depends.stamp $
+    obj/cmd/pwdecrypt/pwdecrypt.compile_depends.stamp $
+    obj/cmd/signtool/signtool.compile_depends.stamp $
+    obj/cmd/signver/signver.compile_depends.stamp $
+    obj/cmd/smimetools/cmsutil.compile_depends.stamp $
+    obj/cmd/ssltap/ssltap.compile_depends.stamp $
+    obj/cmd/symkeyutil/symkeyutil.compile_depends.stamp $
+    obj/nss-tool/nss.compile_depends.stamp $
+    obj/nss-tool/hw-support.compile_depends.stamp
+

@@ -1,0 +1,47 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssck.api: copy $
+    ../../lib/ckfw/nssck.api
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckepv.h: copy $
+    ../../lib/ckfw/nssckepv.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckft.h: copy $
+    ../../lib/ckfw/nssckft.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckfw.h: copy $
+    ../../lib/ckfw/nssckfw.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckfwc.h: copy $
+    ../../lib/ckfw/nssckfwc.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckfwt.h: copy $
+    ../../lib/ckfw/nssckfwt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckg.h: copy $
+    ../../lib/ckfw/nssckg.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckmdt.h: copy $
+    ../../lib/ckfw/nssckmdt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssckt.h: copy $
+    ../../lib/ckfw/nssckt.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ck.h: copy $
+    ../../lib/ckfw/ck.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ckfw.h: copy $
+    ../../lib/ckfw/ckfw.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ckfwm.h: copy $
+    ../../lib/ckfw/ckfwm.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ckfwtm.h: copy $
+    ../../lib/ckfw/ckfwtm.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ckmd.h: copy $
+    ../../lib/ckfw/ckmd.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/ckt.h: copy $
+    ../../lib/ckfw/ckt.h
+build obj/lib/ckfw/lib_ckfw_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssck.api $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckepv.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckft.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckfw.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckfwc.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckfwt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckg.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckmdt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssckt.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ck.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ckfw.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ckfwm.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ckfwtm.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ckmd.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/ckt.h
+

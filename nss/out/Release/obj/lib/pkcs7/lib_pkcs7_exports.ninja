@@ -1,0 +1,14 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs7t.h: copy $
+    ../../lib/pkcs7/pkcs7t.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secmime.h: copy $
+    ../../lib/pkcs7/secmime.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secpkcs7.h: copy $
+    ../../lib/pkcs7/secpkcs7.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/p7local.h: copy $
+    ../../lib/pkcs7/p7local.h
+build obj/lib/pkcs7/lib_pkcs7_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs7t.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secmime.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secpkcs7.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/p7local.h
+

@@ -1,0 +1,78 @@
+build obj/lib/softoken/legacydb/nssdbm.actions_depends.stamp: stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    obj/nss_exports.actions_depends.stamp
+
+build obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp: stamp $
+    obj/lib/dbm/include/lib_dbm_include_exports.actions_rules_copies.stamp $
+    obj/nss_exports.compile_depends.stamp
+
+defines = '-DSHLIB_SUFFIX="so"' '-DSHLIB_PREFIX="lib"' $
+    '-DLG_LIB_NAME="libnssdbm3.so"' -DNSS_FIPS_DISABLED $
+    -DNSS_NO_INIT_SUPPORT -DNSS_X86_OR_X64 -DNSS_X64 -DNSS_USE_64 $
+    -DUSE_UTIL_DIRECTLY -DNO_NSPR_10_SUPPORT $
+    -DSSL_DISABLE_DEPRECATED_CIPHER_SUITE_NAMES -DLINUX2_1 -DLINUX -Dlinux $
+    -DHAVE_STRERROR -DXP_UNIX -D_REENTRANT -DNSS_DISABLE_LIBPKIX -DDEBUG
+includes = -I/home/work/Documents/tls_middlebox/dist/Debug/include/nspr $
+    -I/home/work/Documents/tls_middlebox/dist/private/nss $
+    -I/home/work/Documents/tls_middlebox/dist/public/dbm $
+    -I/home/work/Documents/tls_middlebox/dist/public/nss
+cflags = -fPIC -pipe -ffunction-sections -fdata-sections -m64 -Werror -Wall $
+    -Wshadow -O0 -g -gdwarf-2
+cflags_c = 
+cflags_cc = -std=c++0x
+arflags = 
+
+build obj/lib/softoken/legacydb/nssdbm.dbmshim.o: cc $
+    ../../lib/softoken/legacydb/dbmshim.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.keydb.o: cc $
+    ../../lib/softoken/legacydb/keydb.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lgattr.o: cc $
+    ../../lib/softoken/legacydb/lgattr.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lgcreate.o: cc $
+    ../../lib/softoken/legacydb/lgcreate.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lgdestroy.o: cc $
+    ../../lib/softoken/legacydb/lgdestroy.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lgfind.o: cc $
+    ../../lib/softoken/legacydb/lgfind.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lgfips.o: cc $
+    ../../lib/softoken/legacydb/lgfips.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lginit.o: cc $
+    ../../lib/softoken/legacydb/lginit.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lgutil.o: cc $
+    ../../lib/softoken/legacydb/lgutil.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lowcert.o: cc $
+    ../../lib/softoken/legacydb/lowcert.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.lowkey.o: cc $
+    ../../lib/softoken/legacydb/lowkey.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.pcertdb.o: cc $
+    ../../lib/softoken/legacydb/pcertdb.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+build obj/lib/softoken/legacydb/nssdbm.pk11db.o: cc $
+    ../../lib/softoken/legacydb/pk11db.c || $
+    obj/lib/softoken/legacydb/nssdbm.compile_depends.stamp
+
+build libnssdbm.a: alink obj/lib/softoken/legacydb/nssdbm.dbmshim.o $
+    obj/lib/softoken/legacydb/nssdbm.keydb.o $
+    obj/lib/softoken/legacydb/nssdbm.lgattr.o $
+    obj/lib/softoken/legacydb/nssdbm.lgcreate.o $
+    obj/lib/softoken/legacydb/nssdbm.lgdestroy.o $
+    obj/lib/softoken/legacydb/nssdbm.lgfind.o $
+    obj/lib/softoken/legacydb/nssdbm.lgfips.o $
+    obj/lib/softoken/legacydb/nssdbm.lginit.o $
+    obj/lib/softoken/legacydb/nssdbm.lgutil.o $
+    obj/lib/softoken/legacydb/nssdbm.lowcert.o $
+    obj/lib/softoken/legacydb/nssdbm.lowkey.o $
+    obj/lib/softoken/legacydb/nssdbm.pcertdb.o $
+    obj/lib/softoken/legacydb/nssdbm.pk11db.o || $
+    obj/lib/softoken/legacydb/nssdbm.actions_depends.stamp

@@ -1,0 +1,26 @@
+build /home/work/Documents/tls_middlebox/dist/private/nss/nsspki.h: copy $
+    ../../lib/pki/nsspki.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/nsspkit.h: copy $
+    ../../lib/pki/nsspkit.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pki.h: copy $
+    ../../lib/pki/pki.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pki3hack.h: copy $
+    ../../lib/pki/pki3hack.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pkim.h: copy $
+    ../../lib/pki/pkim.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pkistore.h: copy $
+    ../../lib/pki/pkistore.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pkit.h: copy $
+    ../../lib/pki/pkit.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/pkitm.h: copy $
+    ../../lib/pki/pkitm.h
+build obj/lib/pki/lib_pki_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/private/nss/nsspki.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/nsspkit.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pki.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pki3hack.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pkim.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pkistore.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pkit.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/pkitm.h
+

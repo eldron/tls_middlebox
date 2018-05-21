@@ -1,0 +1,119 @@
+build /home/work/Documents/tls_middlebox/dist/public/nss/base64.h: copy $
+    ../../lib/util/base64.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/ciferfam.h: copy $
+    ../../lib/util/ciferfam.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/eccutil.h: copy $
+    ../../lib/util/eccutil.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/hasht.h: copy $
+    ../../lib/util/hasht.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssb64.h: copy $
+    ../../lib/util/nssb64.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssb64t.h: copy $
+    ../../lib/util/nssb64t.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssilckt.h: copy $
+    ../../lib/util/nssilckt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssilock.h: copy $
+    ../../lib/util/nssilock.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nsslocks.h: copy $
+    ../../lib/util/nsslocks.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssrwlk.h: copy $
+    ../../lib/util/nssrwlk.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssrwlkt.h: copy $
+    ../../lib/util/nssrwlkt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/nssutil.h: copy $
+    ../../lib/util/nssutil.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11.h: copy $
+    ../../lib/util/pkcs11.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11f.h: copy $
+    ../../lib/util/pkcs11f.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11n.h: copy $
+    ../../lib/util/pkcs11n.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11p.h: copy $
+    ../../lib/util/pkcs11p.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11t.h: copy $
+    ../../lib/util/pkcs11t.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11u.h: copy $
+    ../../lib/util/pkcs11u.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11uri.h: copy $
+    ../../lib/util/pkcs11uri.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/pkcs1sig.h: copy $
+    ../../lib/util/pkcs1sig.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/portreg.h: copy $
+    ../../lib/util/portreg.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secasn1.h: copy $
+    ../../lib/util/secasn1.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secasn1t.h: copy $
+    ../../lib/util/secasn1t.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/seccomon.h: copy $
+    ../../lib/util/seccomon.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secder.h: copy $
+    ../../lib/util/secder.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secdert.h: copy $
+    ../../lib/util/secdert.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secdig.h: copy $
+    ../../lib/util/secdig.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secdigt.h: copy $
+    ../../lib/util/secdigt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secerr.h: copy $
+    ../../lib/util/secerr.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secitem.h: copy $
+    ../../lib/util/secitem.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secoid.h: copy $
+    ../../lib/util/secoid.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secoidt.h: copy $
+    ../../lib/util/secoidt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/secport.h: copy $
+    ../../lib/util/secport.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/utilmodt.h: copy $
+    ../../lib/util/utilmodt.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/utilpars.h: copy $
+    ../../lib/util/utilpars.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/utilparst.h: copy $
+    ../../lib/util/utilparst.h
+build /home/work/Documents/tls_middlebox/dist/public/nss/utilrename.h: copy $
+    ../../lib/util/utilrename.h
+build /home/work/Documents/tls_middlebox/dist/private/nss/templates.c: copy $
+    ../../lib/util/templates.c
+build /home/work/Documents/tls_middlebox/dist/private/nss/verref.h: copy $
+    ../../lib/util/verref.h
+build obj/lib/util/lib_util_exports.actions_rules_copies.stamp: stamp $
+    /home/work/Documents/tls_middlebox/dist/public/nss/base64.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/ciferfam.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/eccutil.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/hasht.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssb64.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssb64t.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssilckt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssilock.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nsslocks.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssrwlk.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssrwlkt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/nssutil.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11f.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11n.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11p.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11t.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11u.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs11uri.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/pkcs1sig.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/portreg.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secasn1.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secasn1t.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/seccomon.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secder.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secdert.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secdig.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secdigt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secerr.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secitem.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secoid.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secoidt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/secport.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/utilmodt.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/utilpars.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/utilparst.h $
+    /home/work/Documents/tls_middlebox/dist/public/nss/utilrename.h $
+    /home/work/Documents/tls_middlebox/dist/private/nss/templates.c $
+    /home/work/Documents/tls_middlebox/dist/private/nss/verref.h
+
