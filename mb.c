@@ -104,6 +104,74 @@ void forward_data(int one, int another){
     }
 }
 
+// when received the first clieht hello, middlebox record A_{1}
+// when received the n'th client hello, middlebox record A_{n}
+// when received the n'th server hello, middlebox compute a_{n} = A_{n-1}^alpha
+// when received application data, try to decrypt and do DPI
+void asymmetric_handle_connection(int client_fd, int server_fd){
+    fd_set read_fds;
+    char buffer[2048];
+    int len;
+
+    printf("forward_data is called\n");
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    int big;
+    if(client_fd > server_fd){
+        big = client_fd;
+    } else {
+        big = server_fd;
+    }
+
+    // record the TLS handshake state
+    
+    while(1){
+        FD_ZERO(&read_fds);
+        FD_SET(client_fd, &read_fds);
+        FD_SET(server_fd, &read_fds);
+
+        int number_of_active_fd = select(big + 1, &read_fds, NULL, NULL, NULL);
+        if(number_of_active_fd < 0){
+            fprintf(stderr, "forward_data: select error\n");
+            close(client_fd);
+            close(server_fd);
+            return;
+        } else {
+            if(FD_ISSET(client_fd, &read_fds)){
+                // read from one, send to another
+                len = read(client_fd, buffer, 2048);
+                if(len <= 0){
+                    // close the sockets
+                    close(client_fd);
+                    close(server_fd);
+                    return;
+                } else {
+                    printf("forward_data: read from one, send to another\n");
+                    write(server_fd, buffer, len);
+                }
+            } else {
+                //fprintf(stderr, "one is not set\n");
+            }
+
+            if(FD_ISSET(server_fd, &read_fds)){
+                // read from another, send to one
+                len = read(server_fd, buffer, 2048);
+                if(len <= 0){
+                    // close the sockets
+                    close(client_fd);
+                    close(server_fd);
+                    return;
+                } else {
+                    printf("forward_data: read from another, send to one\n");
+                    write(client_fd, buffer, len);
+                }
+            } else {
+                fprintf(stderr, "another is not set\n");
+            }
+        }
+    }
+}
 void * handle_connection(void * sock){
     int client_fd = *(int *) sock;
     int len;

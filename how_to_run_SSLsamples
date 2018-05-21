@@ -1,0 +1,50 @@
+how to run SSLsample/client and server:
+
+1. export LD_LIBRARY_PATH=/home/work/Documents/dist/Debug/lib
+
+password is 11111111
+
+2. create CA root certificate
+mkdir CA_db
+./certutil -N -d CA_db 
+./certutil -S -d CA_db -n "MyCo's Root CA" -s "CN=My CA,O=MyCo,ST=California,C=US" -t "CT,," -x -2
+./certutil -L -d CA_db -n "MyCo's Root CA" -a -o CA_db/rootca.crt
+./certutil -L -d CA_db 
+
+3. create server certificate
+mkdir server_db
+./certutil -N -d server_db 
+./certutil -A -d server_db -n "MyCo's Root CA" -t "TC,," -a -i CA_db/rootca.crt
+./certutil -R -d server_db -s "CN=localhost,O=MyCo,ST=California,C=US" -a -o server_db/server.req
+./certutil -C -d CA_db -c "MyCo's Root CA" -a -i server_db/server.req -o server_db/server.crt -2 -6
+first choose 0: server auth
+is this a critical extension:N
+is this ia CA certificate:N
+
+./certutil -A -d server_db -n localhost -a -i server_db/server.crt -t ",," 
+./certutil -L -d server_db 
+
+4. create client certificate
+mkdir client_db
+./certutil -N -d client_db 
+./certutil -A -d client_db -n "MyCo's Root CA" -t "TC,," -a -i CA_db/rootca.crt
+./certutil -R -d client_db -s "CN=joe_client,O=MyCo,ST=California,C=US" -a -o client_db/client.req
+./certutil -C -d CA_db -c "MyCo's Root CA" -a -i client_db/client.req -o client_db/client.crt -2 -6
+first choose 1: client auth
+is this a critical extension:N
+is this ia CA certificate:N
+
+./certutil -A -d client_db -n joe_client -a -i client_db/client.crt -t ",," 
+./certutil -L -d client_db 
+
+5. verify certificate
+./certutil -V -d server_db -u V -n localhost
+./certutil -V -d client_db -u C -n joe_client
+
+
+6.
+run server:
+ ./server -n localhost -p 10000 -F -w 11111111 -d /home/work/Documents/dist/Debug/bin/server_db/
+7.
+run client:
+./client -n joe_client -p 10000 -d /home/work/Documents/dist/Debug/bin/client_db/ -w 11111111 localhost
