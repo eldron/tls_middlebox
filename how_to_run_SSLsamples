@@ -1,6 +1,6 @@
 how to run SSLsample/client and server:
 
-1. export LD_LIBRARY_PATH=/home/work/Documents/dist/Debug/lib
+1. export LD_LIBRARY_PATH=./dist/Debug/lib
 
 password is 11111111
 
