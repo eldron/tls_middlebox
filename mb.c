@@ -19,7 +19,88 @@
 #define CLIENT_HELLO_RANDOM_LENGTH 32
 #define SESSION_ID_LENGTH 32
 
+typedef enum {
+    ssl_server_name_xtn = 0,
+    ssl_cert_status_xtn = 5,
+    ssl_supported_groups_xtn = 10,
+    ssl_ec_point_formats_xtn = 11,
+    ssl_signature_algorithms_xtn = 13,
+    ssl_use_srtp_xtn = 14,
+    ssl_app_layer_protocol_xtn = 16,
+    /* signed_certificate_timestamp extension, RFC 6962 */
+    ssl_signed_cert_timestamp_xtn = 18,
+    ssl_padding_xtn = 21,
+    ssl_extended_master_secret_xtn = 23,
+    ssl_session_ticket_xtn = 35,
+    /* 40 was used in draft versions of TLS 1.3; it is now reserved. */
+    ssl_tls13_pre_shared_key_xtn = 41,
+    ssl_tls13_early_data_xtn = 42,
+    ssl_tls13_supported_versions_xtn = 43,
+    ssl_tls13_cookie_xtn = 44,
+    ssl_tls13_psk_key_exchange_modes_xtn = 45,
+    ssl_tls13_ticket_early_data_info_xtn = 46, /* Deprecated. */
+    ssl_tls13_certificate_authorities_xtn = 47,
+    ssl_signature_algorithms_cert_xtn = 50,
+    ssl_tls13_key_share_xtn = 51,
+    ssl_next_proto_nego_xtn = 13172, /* Deprecated. */
+    ssl_renegotiation_info_xtn = 0xff01,
+    ssl_tls13_short_header_xtn = 0xff03 /* Deprecated. */
+} SSLExtensionType;
 
+char * get_ext_name(uint16_t type){
+    switch(type){
+        case ssl_server_name_xtn:
+        return "server_name_xtn";
+        case ssl_cert_status_xtn:
+        return "cert_status_xtn";
+        case ssl_supported_groups_xtn:
+            return "supported_groups_xtn";
+        case ssl_ec_point_formats_xtn:
+            return "ec_point_formats_xtn";
+        case ssl_signature_algorithms_xtn:
+            return "signature_algorithms_xtn";
+        case ssl_use_srtp_xtn:
+            return "use_srtp_xtn";
+        case ssl_app_layer_protocol_xtn:
+            return "app_layer_protocol_xtn";
+        case ssl_signed_cert_timestamp_xtn:
+            return "signed_cert_timestamp_xtn";
+        case ssl_padding_xtn:
+            return "padding_xtn";
+        case ssl_extended_master_secret_xtn:
+            return "extended_master_secret_xtn";
+        case ssl_session_ticket_xtn:
+            return  "session_ticket_xtn";
+        case ssl_tls13_pre_shared_key_xtn:
+            return "tls13_pre_shared_key_xtn";
+        case ssl_tls13_early_data_xtn:
+            return "tls13_early_data_xtn";
+        case ssl_tls13_supported_versions_xtn:
+            return "tls13_supported_versions_xtn";
+        case ssl_tls13_cookie_xtn:
+            return "tls13_cookie_xtn";
+        case ssl_tls13_psk_key_exchange_modes_xtn:
+            return "tls13_psk_key_exchange_modes_xtn";
+        case ssl_tls13_ticket_early_data_info_xtn:
+            return "tls13_ticket_early_data_info_xtn";
+        case ssl_tls13_certificate_authorities_xtn:
+            return "tls13_certificate_authorities_xtn";
+        case ssl_signature_algorithms_cert_xtn:
+            return "signautre_algorithms_cert";
+        case ssl_tls13_key_share_xtn:
+            return "tls13_key_share_xtn";
+        case ssl_next_proto_nego_xtn:
+            return "next_proto_nego_xtn";
+        case ssl_renegotiation_info_xtn:
+            return "renegotiation_info_xtn";
+        case ssl_tls13_short_header_xtn:
+            return "tls13_short_header_xtn";
+        default:
+            return "unknown extension";
+    }
+
+    return "unknown extension";
+}
 // consume handshake functions copied from ssl3cons.c
 
 /* Read up the next "bytes" number of bytes from the (decrypted) input
@@ -137,19 +218,82 @@ ssl3_ConsumeHandshakeVariable(SECItem *i, PRUint32 bytes,
     return SECSuccess;
 }
 
-SECStatus parse_client_hello_cookie_extension(TLSExtension * extensions, TLSExtension * cookie, PRUint8 ** buffer, PRUint32 * length){
+SECStatus parse_cookie_extension(PRCList * extensions, 
+    TLSExtension * cookie, PRUint8 ** buffer, PRUint32 * length){
     // add the cookie extensino to extensions list
-
-
+    PR_APPEND_LINK(&(cookie->link), extensions);
     cookie->type = ssl_tls13_cookie_xtn;
+    // cookie length field consumes 2 bytes
     return ssl3_ConsumeHandshakeVariable(&(cookie->data), 2, buffer, length);
 }
 
-SECStatus parse_client_hello_supported_versions_extension(TLSExtension * extensions, TLSExtension * supported_versions, PRUint8 ** buffer, PRUint32 * length){
-    // add the extension to extensions list
+void print_cookie_ext(TLSExtension * ext){
+    printf("type is %u\n", ext->type);
+    printf("cookie length is %u\n", ext->data.len);
+}
 
+SECStatus parse_client_hello_supported_versions_extension(PRCList * extensions, 
+    TLSExtension * supported_versions, PRUint8 ** buffer, PRUint32 * length){
+    // add the extension to extensions list
+    PR_APPEND_LINK(&(supported_versions->link), extensions);
     supported_versions->type = ssl_tls13_supported_versions_xtn;
-    return ssl3_ConsumeHandshakeVariable(&(supported_versions->data), 2, buffer, length);
+    // client hello supported versions length field consumes 1 byte
+    return ssl3_ConsumeHandshakeVariable(&(supported_versions->data), 1, buffer, length);
+}
+
+void print_client_hello_supported_versions_ext(TLSExtension * ext){
+    printf("type is %u\n", ext->type);
+    printf("length is %u\n", ext->data.len);
+    printf("supported versions in client hello are: ");
+    int i = 0;
+    while(i < ext->data.len){
+        uint16_t * ptr = (uint16_t *) &(ext->data.data[i]);
+        uint16_t version = ntohs(*ptr);
+        i += 2;
+        printf("%u ", version);
+    }
+    printf("\n");
+}
+
+SECStatus parse_server_hello_supported_versions_extensions(PRCList * extensions, 
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_tls13_supported_versions_xtn;
+        ext->data.len = 2;
+        ext->data.data = *buffer;// no length field for supported extension in serverhello,
+        // selected version consumes 2 bytes
+        *buffer += 2;
+        *length -= 2;
+        return SECSuccess;
+    }
+
+void print_server_hello_supported_versions_ext(TLSExtension * ext){
+    printf("type is: %u\n", ext->type);
+    printf("length = %u\n", ext->data.len);
+    printf("selected version = %u\n", ntohs(*((uint16_t *) ext->data.data)));
+}
+
+// each signature alrorithm enumerate consumes 2 bytes
+SECStatus parse_signature_algorithm_cert_ext(PRCList * extensions, 
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+    
+    PR_APPEND_LINK(&(ext->link), extensions);
+    ext->type = ssl_signature_algorithms_cert_xtn;
+    // length field consumes 2 bytes
+    return ssl3_ConsumeHandshakeVariable(&(ext->data), 2, buffer, length);
+}
+
+SECStatus parse_signature_algorithms_ext(PRCList * extensions,
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+    
+    PR_APPEND_LINK(&(ext->link), extensions);
+    ext->type = ssl_signature_algorithms_xtn;
+    // length field consumes 2 bytes
+    return ssl3_ConsumeHandshakeVariable(&(ext->data), 2, buffer, length);
+}
+
+void print_signature_algorithms(TLSExtension * ext){
+    printf("type is %d")
 }
 // does not include type
 // type is included in TLSExtension
