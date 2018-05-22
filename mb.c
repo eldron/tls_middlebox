@@ -10,6 +10,196 @@
 #include <sys/time.h> //FD_SET, FD_ISSET, FD_ZERO macros 
 #include <pthread.h>
 #include <netdb.h>
+#include <stdint.h>
+
+#include "sslt.h" // /nss/lib/ssl/sslt.h
+#include "ssl3ext.h" // /nss/lib/ssl/ssl3ext.h
+#include "prclist.h" // /nspr/pr/include/prclist.h
+
+#define CLIENT_HELLO_RANDOM_LENGTH 32
+#define SESSION_ID_LENGTH 32
+
+
+// consume handshake functions copied from ssl3cons.c
+
+/* Read up the next "bytes" number of bytes from the (decrypted) input
+ * stream "b" (which is *length bytes long). Copy them into buffer "v".
+ * Reduces *length by bytes.  Advances *b by bytes.
+ *
+ * If this function returns SECFailure, it has already sent an alert,
+ * and has set a generic error code.  The caller should probably
+ * override the generic error code by setting another.
+ */
+SECStatus
+ssl3_ConsumeHandshake(void *v, PRUint32 bytes, PRUint8 **b,
+                      PRUint32 *length){
+
+    if ((PRUint32)bytes > *length) {
+        fprintf(stderr, "ssl3_ConsumeHandshake: bytes larger than length\n");
+        return SECFailure;
+    }
+    PORT_Memcpy(v, *b, bytes);
+    *b += bytes;
+    *length -= bytes;
+    return SECSuccess;
+}
+/* Read up the next "bytes" number of bytes from the (decrypted) input
+ * stream "b" (which is *length bytes long), and interpret them as an
+ * integer in network byte order.  Sets *num to the received value.
+ * Reduces *length by bytes.  Advances *b by bytes.
+ *
+ * On error, an alert has been sent, and a generic error code has been set.
+ */
+SECStatus
+ssl3_ConsumeHandshakeNumber64(PRUint64 *num, PRUint32 bytes,
+                              PRUint8 **b, PRUint32 *length)
+{
+    PRUint8 *buf = *b;
+    PRUint32 i;
+    *num = 0;
+    if (bytes > sizeof(*num)) {
+        //PORT_SetError(SEC_ERROR_LIBRARY_FAILURE);
+        fprintf(stderr, "ssl3_ConsumeHandshakeNumber64: bytes larger than size of *num\n");
+        return SECFailure;
+    }
+
+    if (bytes > *length) {
+        fprintf(stderr, "ssl3_ConsumeHandshakeNumber64: bytes larger than *length\n");
+        return SECFailure;
+    }
+
+    for (i = 0; i < bytes; i++) {
+        *num = (*num << 8) + buf[i];
+    }
+    *b += bytes;
+    *length -= bytes;
+    return SECSuccess;
+}
+
+SECStatus
+ssl3_ConsumeHandshakeNumber(PRUint32 *num, PRUint32 bytes,
+                            PRUint8 **b, PRUint32 *length)
+{
+    PRUint64 num64;
+    SECStatus rv;
+
+    PORT_Assert(bytes <= sizeof(*num));
+    if (bytes > sizeof(*num)) {
+        fprintf(stderr, "ssl3_ConsumeHandshakeNumber: bytes larger than *num\n");
+        return SECFailure;
+    }
+    rv = ssl3_ConsumeHandshakeNumber64(&num64, bytes, b, length);
+    if (rv != SECSuccess) {
+        return SECFailure;
+    }
+    *num = num64 & 0xffffffff;
+    return SECSuccess;
+}
+/* Read in two values from the incoming decrypted byte stream "b", which is
+ * *length bytes long.  The first value is a number whose size is "bytes"
+ * bytes long.  The second value is a byte-string whose size is the value
+ * of the first number received.  The latter byte-string, and its length,
+ * is returned in the SECItem i.
+ *
+ * Returns SECFailure (-1) on failure.
+ * On error, an alert has been sent, and a generic error code has been set.
+ *
+ * RADICAL CHANGE for NSS 3.11.  All callers of this function make copies
+ * of the data returned in the SECItem *i, so making a copy of it here
+ * is simply wasteful.  So, This function now just sets SECItem *i to
+ * point to the values in the buffer **b.
+ */
+SECStatus
+ssl3_ConsumeHandshakeVariable(SECItem *i, PRUint32 bytes,
+                              PRUint8 **b, PRUint32 *length)
+{
+    PRUint32 count;
+    SECStatus rv;
+
+    PORT_Assert(bytes <= 3);
+    i->len = 0;
+    i->data = NULL;
+    i->type = siBuffer;
+    rv = ssl3_ConsumeHandshakeNumber(&count, bytes, b, length);
+    if (rv != SECSuccess) {
+        return SECFailure;
+    }
+    if (count > 0) {
+        if (count > *length) {
+            fprintf(stderr, "ssl3_ConsumeHandshakeVariable: count larger than *length\n");
+            return SECFailure;
+        }
+        i->data = *b;
+        i->len = count;
+        *b += count;
+        *length -= count;
+    }
+    return SECSuccess;
+}
+
+SECStatus parse_client_hello_cookie_extension(TLSExtension * extensions, TLSExtension * cookie, PRUint8 ** buffer, PRUint32 * length){
+    // add the cookie extensino to extensions list
+
+
+    cookie->type = ssl_tls13_cookie_xtn;
+    return ssl3_ConsumeHandshakeVariable(&(cookie->data), 2, buffer, length);
+}
+
+SECStatus parse_client_hello_supported_versions_extension(TLSExtension * extensions, TLSExtension * supported_versions, PRUint8 ** buffer, PRUint32 * length){
+    // add the extension to extensions list
+
+    supported_versions->type = ssl_tls13_supported_versions_xtn;
+    return ssl3_ConsumeHandshakeVariable(&(supported_versions->data), 2, buffer, length);
+}
+// does not include type
+// type is included in TLSExtension
+// every protocol version consumes two bytes
+struct client_hello_supported_versions_extension{
+    uint16_t len; // length of data in bytes
+    uint8_t * data;
+};
+
+struct server_hello_supported_version_extension{
+    uint16_t selected_version;
+};
+
+
+struct client_hello_str{
+
+    PRCList extensions;
+};
+
+TLSExtension * find_extension(PRCList * extensions_list, SSLExtensionType extension_type){
+    PRCList * cursor;
+    for(cursor = PR_NEXT_LINK(extensions_list); cursor != extensions_list; cursor = PR_NEXT_LINK(cursor)){
+        TLSExtension * extension = (TLSExtension *) cursor;
+        if(extension->type == extension_type){
+            return extension;
+        }
+    }
+}
+
+// parse client hello and print it
+// buffer starts from tcp payload data
+void print_client_hello(unsigned char * buffer){
+    int idx = 0;
+    uint8_t record_type = buffer[0];
+    idx++;
+    uint16_t legacy_record_version = ntohs(*((uint16_t *) buffer + idx));
+    idx += 2;
+    uint16_t record_length = ntohs(*((uint16_t *) buffer + idx));
+    idx += 2;
+
+    uint8_t msg_type = (uint8_t) buffer[idx];
+    idx += 1;
+    uint16_t msg_length = ntohs(*((uint16_t *) buffer + idx));
+    idx += 2;
+    uint16_t legacy_version = ntohs(*((uint16_t *) buffer + idx));
+    idx += 2;
+    uint8_t * client_hello_random = (uint8_t *) buffer;
+    idx += 32;
+    
+}
 
 void print_auth_method(unsigned char method){
     printf("authentication method is: ");
