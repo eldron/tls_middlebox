@@ -15,9 +15,19 @@
 #include "sslt.h" // /nss/lib/ssl/sslt.h
 #include "ssl3ext.h" // /nss/lib/ssl/ssl3ext.h
 #include "prclist.h" // /nspr/pr/include/prclist.h
-
+#include "ssl3prot.h" // 
 #define CLIENT_HELLO_RANDOM_LENGTH 32
 #define SESSION_ID_LENGTH 32
+
+
+// typedef enum {
+//     content_change_cipher_spec = 20,
+//     content_alert = 21,
+//     content_handshake = 22,
+//     content_application_data = 23,
+//     content_alt_handshake = 24,
+//     content_ack = 25
+// } SSL3ContentType;
 
 // later we should replace malloc with customized memory management functions
 
@@ -423,8 +433,13 @@ struct server_hello_supported_version_extension{
 
 
 struct client_hello_str{
-
-    PRCList extensions;
+    uint16_t legacy_version;// should be 0x0303 (tls 1.2)
+    uint8_t * random;// random consumes 32 bytes
+    SECItem legacy_session_id;// <0..32> lenght field consumes 1 byte
+    SECItem cipher_suits;// <2..2^16-2> length field consumes 2 bytes, each cipher suit consumes 2 bytes
+    SECItem legacy_compression_methods;// <1..2^8-1> length field consumes 1 byte
+    SECItem extensions;// <8..2^16-1> length field consumes 2 bytes
+    PRCList ext_list;// link the TLSExtensions to this list
 };
 
 TLSExtension * find_extension(PRCList * extensions_list, SSLExtensionType extension_type){
@@ -437,6 +452,92 @@ TLSExtension * find_extension(PRCList * extensions_list, SSLExtensionType extens
     }
 }
 
+// *buffer should point to legacy_version
+SECStatus parse_client_hello(struct client_hello_str * client_hello,
+    PRUint8 ** buffer, PRUint32 * length){
+        uint32_t legacy_version;
+        ssl3_ConsumeHandshakeNumber(&legacy_version, 2, buffer, length);// legacy version consumes 2 bytes
+        client_hello->legacy_version = (uint16_t) legacy_version;
+        client_hello->random = *buffer;// random consumes 32 bytes
+        *buffer += 32;
+        *length -= 32;
+        SECStatus rv;
+        rv = ssl3_ConsumeHandshakeVariable(&(client_hello->legacy_session_id), 1, buffer, length);
+        if(rv == SECFailure){
+            fprintf(stderr, "parse_client_hello: error reading legacy_session_id\n");
+            return rv;
+        }
+        rv = ssl3_ConsumeHandshakeVariable(&(client_hello->cipher_suits), 2, buffer, length);
+        if(rv == SECFailure){
+            fprintf(stderr, "parse_client_hello: error reading cipher_suits\n");
+            return rv;
+        }
+        rv = ssl3_ConsumeHandshakeVariable(&(client_hello->legacy_compression_methods), 1, buffer, length);
+        if(rv == SECFailure){
+            fprintf(stderr, "parse_client_hello: error reading legacy_compression_methods\n");
+            return rv;
+        }
+        rv = ssl3_ConsumeHandshakeVariable(&(client_hello->extensions), 2, buffer, length);
+        if(rv == SECFailure){
+            fprintf(stderr, "parse_client_hello: error reading extensions\n");
+            return rv;
+        }
+        // parse extensions, link them together
+        PR_INIT_CLIST(&(client_hello->ext_list));
+        PRUint8 * buf = client_hello->extensions.data;
+        PRUint32 len = client_hello->extensions.len;
+        while(len > 0){
+            TLSExtension * ext = (TLSExtension *) malloc(sizeof(TLSExtension));
+            uint32_t type;
+            rv = ssl3_ConsumeHandshakeNumber(&type, 2, &buf, &len);// extension type consumes 2 bytes
+            if(rv == SECFailure){
+                fprintf(stderr, "parse_client_hello: error reading extension type\n");
+                return rv;
+            }
+            ext->type = (PRUint16) type;
+            rv = ssl3_ConsumeHandshakeVariable(&(ext->data), 2, &buf, &len);
+            if(rv == SECFailure){
+                fprintf(stderr, "parse_client_hello: error reading extension content\n");
+                return rv;
+            }
+            PR_APPEND_LINK(&(ext->link), &(client_hello->ext_list));
+        }
+
+        return SECSuccess;
+}
+SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type, 
+    uint32_t * handshake_type, void * content_struct){
+        *content_type = (*buffer)[0];// content type consumes 1 byte
+        *buffer += 3;// legacy record version consumes 2 bytes
+        uint16_t * ptr = (uint16_t *) (*buffer);
+        uint16_t length = ntohs(*ptr);
+        *buffer += 2;// length field consumes 2 bytes
+        if(length > (len - 5)){
+            fprintf(stderr, "parse_record error, length larger than (len - 5)\n");
+            return SECFailure;
+        } else {
+            if(*content_type == content_handshake){
+                PRUint32 msg_type;
+                PRUint32 handshake_length;
+                ssl3_ConsumeHandshakeNumber(&msg_type, 1, buffer, &length);// handshake type consumes 1 byte
+                ssl3_ConsumeHandshakeNumber(&handshake_length, 3, buffer, &length);// handshake length consumes 3 bytes
+                if(msg_type == ssl_hs_client_hello){
+                    // parse client hello
+                    *handshake_type = msg_type;
+                    struct client_hello_str * client_hello = (struct client_hello_str *) malloc(sizeof(client_hello_str));
+
+                } else if (msg_type == ssl_hs_server_hello){
+                    // parse server hello
+                } else {
+                    fprintf(stderr, "parse_record: unimplemented handshake type\n");
+                    return SECSuccess;
+                }
+            } else {
+                fprintf(stderr, "parse_record: unimplemented content type\n");
+                return SECFailure;
+            }
+        }
+}
 // parse client hello and print it
 // buffer starts from tcp payload data
 void print_client_hello(unsigned char * buffer){
