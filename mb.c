@@ -19,33 +19,8 @@
 #define CLIENT_HELLO_RANDOM_LENGTH 32
 #define SESSION_ID_LENGTH 32
 
-typedef enum {
-    ssl_server_name_xtn = 0,
-    ssl_cert_status_xtn = 5,
-    ssl_supported_groups_xtn = 10,
-    ssl_ec_point_formats_xtn = 11,
-    ssl_signature_algorithms_xtn = 13,
-    ssl_use_srtp_xtn = 14,
-    ssl_app_layer_protocol_xtn = 16,
-    /* signed_certificate_timestamp extension, RFC 6962 */
-    ssl_signed_cert_timestamp_xtn = 18,
-    ssl_padding_xtn = 21,
-    ssl_extended_master_secret_xtn = 23,
-    ssl_session_ticket_xtn = 35,
-    /* 40 was used in draft versions of TLS 1.3; it is now reserved. */
-    ssl_tls13_pre_shared_key_xtn = 41,
-    ssl_tls13_early_data_xtn = 42,
-    ssl_tls13_supported_versions_xtn = 43,
-    ssl_tls13_cookie_xtn = 44,
-    ssl_tls13_psk_key_exchange_modes_xtn = 45,
-    ssl_tls13_ticket_early_data_info_xtn = 46, /* Deprecated. */
-    ssl_tls13_certificate_authorities_xtn = 47,
-    ssl_signature_algorithms_cert_xtn = 50,
-    ssl_tls13_key_share_xtn = 51,
-    ssl_next_proto_nego_xtn = 13172, /* Deprecated. */
-    ssl_renegotiation_info_xtn = 0xff01,
-    ssl_tls13_short_header_xtn = 0xff03 /* Deprecated. */
-} SSLExtensionType;
+// later we should replace malloc with customized memory management functions
+
 
 char * get_ext_name(uint16_t type){
     switch(type){
@@ -228,7 +203,7 @@ SECStatus parse_cookie_extension(PRCList * extensions,
 }
 
 void print_cookie_ext(TLSExtension * ext){
-    printf("type is %u\n", ext->type);
+    printf("type is %u %s\n", ext->type, get_ext_name(ext->type));
     printf("cookie length is %u\n", ext->data.len);
 }
 
@@ -242,7 +217,7 @@ SECStatus parse_client_hello_supported_versions_extension(PRCList * extensions,
 }
 
 void print_client_hello_supported_versions_ext(TLSExtension * ext){
-    printf("type is %u\n", ext->type);
+    printf("type is %u %s\n", ext->type, get_ext_name(ext->type));
     printf("length is %u\n", ext->data.len);
     printf("supported versions in client hello are: ");
     int i = 0;
@@ -268,7 +243,7 @@ SECStatus parse_server_hello_supported_versions_extensions(PRCList * extensions,
     }
 
 void print_server_hello_supported_versions_ext(TLSExtension * ext){
-    printf("type is: %u\n", ext->type);
+    printf("type is: %u %s\n", ext->type, get_ext_name(ext->type));
     printf("length = %u\n", ext->data.len);
     printf("selected version = %u\n", ntohs(*((uint16_t *) ext->data.data)));
 }
@@ -292,9 +267,112 @@ SECStatus parse_signature_algorithms_ext(PRCList * extensions,
     return ssl3_ConsumeHandshakeVariable(&(ext->data), 2, buffer, length);
 }
 
-void print_signature_algorithms(TLSExtension * ext){
-    printf("type is %d")
+void print_signature_algorithms_ext(TLSExtension * ext){
+    printf("type is %u %s\n", ext->type, get_ext_name(ext->type));
+    // todo: print signature algorithms
 }
+
+void print_signature_algorithm_cert_ext(TLSExtension * ext){
+    print_signature_algorithms_ext(ext);
+}
+
+// parse certificate authorities extension
+SECStatus parse_certificate_authorities_ext(PRCList * extensions,
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_tls13_certificate_authorities_xtn;
+        // length field consumes 2 bytes
+        return ssl3_ConsumeHandshakeVariable(&(ext->data), 2, buffer, length);
+}
+
+void print_certificate_authorities_ext(TLSExtension * ext){
+    printf("type is %u %s\n", ext->type, get_ext_name(ext->type));
+    // todo: print the certificate authorities
+}
+
+// OID filters extension is sent only by server, in CertificateRequest message
+// ignore post handshake client authentication extension for now
+
+
+// parse supported groups extension 
+SECStatus parse_supported_groups_ext(PRCList * extensions,
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_supported_groups_xtn;
+        // length field consumes 2 bytes
+        return ssl3_ConsumeHandshakeVariable(&(ext->data), 2, buffer, length);
+}
+
+void print_supported_groups_ext(TLSExtension * ext){
+    printf("type is %u %s\n", ext->type, get_ext_name(ext->type));
+    // todo: print groups' names
+}
+
+// parse key share extension in client hello
+SECStatus parse_client_hello_key_share_ext(PRCList * extensions,
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_tls13_key_share_xtn;
+        // length field consumes 2 bytes
+        return ssl3_ConsumeHandshakeVariable(&(ext->data), 2, buffer, length);
+}
+
+struct key_share_entry_str{
+    PRCList link;
+    uint16_t group_name;
+    SECItem data;
+};
+
+// get key share entries from key share extension in client hello
+void get_key_share_entries(TLSExtension * ext, PRCList * key_share_entries){
+    PRUint32 length = ext->data.len;
+    uint8_t * buffer = ext->data.data;
+    while(length > 0){
+        struct key_share_entry_str * entry = (struct key_share_entry_str *) malloc(sizeof(struct key_share_entry_str));
+        PR_APPEND_LINK(&(entry->link), key_share_entries);
+        // read group name
+        ssl3_ConsumeHandshakeNumber(&(entry->group_name), 2, &buffer, &length);
+        // read key exchange
+        ssl3_ConsumeHandshakeVariable(&(entry->data), 2, &buffer, &length);
+    }
+}
+
+// parse key share extension in hello retry request message
+SECStatus parse_hello_retry_request_key_share_ext(PRCList * extensions, 
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_tls13_key_share_xtn;
+        ext->data.len = 2;
+        ext->data.data = *buffer;
+        *buffer += 2;
+        *length -= 2;
+        return SECSuccess;
+}
+
+void print_hello_retry_request_key_share_ext(TLSExtension * ext){
+    pritnf("type is %u %s\n", ext->type, get_ext_name(ext->type));
+    uint16_t * ptr = (uint16_t *) ext->data.data;
+    uint16_t group_name = ntohs(*ptr);
+    printf("group name is %u\n", group_name);
+}
+
+// parse key share extension in server hello message
+// we make ext->data.data point to the key_share_entry_str struct
+// ext->data.len is not used
+SECStatus parse_server_hello_key_share_ext(PRCList * extensions,
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_tls13_key_share_xtn;
+
+        struct key_share_entry_str * entry = (struct key_share_entries *) malloc(sizeof(struct key_share_entry_str));
+        ext->data.data = (char *) entry;
+        // now read group name
+        ssl3_ConsumeHandshakeNumber(&(entry->group_name), 2, &buffer, &length);
+        // now read key_exchange
+        return ssl3_ConsumeHandshakeVariable(&(entry->data), 2, &buffer, &length);
+}
+
+
 // does not include type
 // type is included in TLSExtension
 // every protocol version consumes two bytes

@@ -3,6 +3,8 @@
         "inet.h": "c",
         "socket.h": "c",
         "stdint.h": "c",
-        "ssl3ext.h": "c"
+        "ssl3ext.h": "c",
+        "array": "c",
+        "string_view": "c"
     }
 }
