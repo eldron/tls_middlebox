@@ -1,0 +1,16 @@
+TLSv1.3 Record Layer: Handshake Protocol: Server Hello
+    Content Type: Handshake (22)
+    Version: TLS 1.2 (0x0303)
+    Length: 122
+    Handshake Protocol: Server Hello
+        Handshake Type: Server Hello (2)
+        Length: 118
+        Version: TLS 1.2 (0x0303)
+        Random: 4e6ad0481f3264ddd7e9a4aa4b122d806f79f5379a9035ed...
+        Session ID Length: 32
+        Session ID: 28a33a9f1a1c4d91d84cbde00061258f09f6ebc59b66d9a0...
+        Cipher Suite: TLS_AES_128_GCM_SHA256 (0x1301)
+        Compression Method: null (0)
+        Extensions Length: 46
+        Extension: key_share (len=36)
+        Extension: supported_versions (len=2)

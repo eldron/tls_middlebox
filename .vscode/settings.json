@@ -5,6 +5,7 @@
         "stdint.h": "c",
         "ssl3ext.h": "c",
         "array": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "mb_parse_tls_13.h": "c"
     }
 }
