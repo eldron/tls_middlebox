@@ -367,12 +367,48 @@ SECStatus parse_server_hello_key_share_ext(PRCList * extensions,
         struct key_share_entry_str * entry = (struct key_share_entries *) malloc(sizeof(struct key_share_entry_str));
         ext->data.data = (char *) entry;
         // now read group name
-        ssl3_ConsumeHandshakeNumber(&(entry->group_name), 2, &buffer, &length);
+        ssl3_ConsumeHandshakeNumber(&(entry->group_name), 2, buffer, length);
         // now read key_exchange
-        return ssl3_ConsumeHandshakeVariable(&(entry->data), 2, &buffer, &length);
+        // for DH parameters, entry->data.data contains public value, big endian integer Y
+        // for secp256r1, entry->data.data contains:
+        // uint8 legacy_form = 4, opaque X[32] and opaque Y[32]
+        // for secp384r1, entry->data.data contains:
+        // uint8 legacy_form = 4, opaque X[48] and opaque Y[48]
+        // for secp521r1, entry->data.data contains:
+        // uint8 legacy_form = 4, opaque X[66] and opaque Y[66]
+        // for x25519: entry->data.data contains the byte string inputs and outputs of
+        // the corresponding functions defined in RFC7748, 32 bytes for x25519
+        return ssl3_ConsumeHandshakeVariable(&(entry->data), 2, buffer, length);
 }
 
+// parse pre-shared key exchange modes extension
+SECStatus parse_pre_shared_key_exchange_modes_ext(PRCList * extensions,
+    TLSExtension * ext, PRUint8 ** buffer, PRUint32 * length){
+        PR_APPEND_LINK(&(ext->link), extensions);
+        ext->type = ssl_tls13_psk_key_exchange_modes_xtn;
+        return ssl3_ConsumeHandshakeVariable(&(ext->data), 1, buffer, length);
+}
 
+char * get_psk_exhange_mode_name(uint8_t mode){
+    if(mode == 0){
+        return "psk_ke psk-only key establishment";
+    } else if(mode == 1){
+        return "psk_dhe_ke with (EC)DHE key establishment";
+    } else {
+        return "illegal psk exchange mode";
+    }
+}
+void print_pre_shared_key_exchange_modes(TLSExtension * ext){
+    printf("type is %u %s\n", ext->type, get_ext_name(ext->type));
+    printf("%u modes: ", ext->data.len);
+    int i;
+    for(i = 0;i < ext->data.len;i++){
+        uint8_t mode = (uint8_t) ext->data.data[i];
+        pritnf("%u %s\n", mode, get_psk_exhange_mode_name(mode));
+    }
+}
+
+// parse eary data 
 // does not include type
 // type is included in TLSExtension
 // every protocol version consumes two bytes
