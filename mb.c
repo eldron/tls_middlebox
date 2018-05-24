@@ -12,14 +12,52 @@
 #include <netdb.h>
 #include <stdint.h>
 
-#include "sslt.h" // /nss/lib/ssl/sslt.h
-#include "ssl3ext.h" // /nss/lib/ssl/ssl3ext.h
-#include "prclist.h" // /nspr/pr/include/prclist.h
-#include "ssl3prot.h" // 
-
 #include "mb_parse_tls_13.h"
 
 // later we should replace malloc with customized memory management functions
+
+struct memory_pool{
+    char * data;
+    uint32_t idx;
+    uint32_t length; // max length of this memory pool
+};
+
+struct memory_pool mem_pool;
+
+char * memory_pool_malloc(struct memory_pool * pool, uint32_t len){
+    if(pool->idx + len > pool->length){
+        return NULL;
+    } else {
+        uint32_t tmp = pool->idx;
+        pool->idx += len;
+        return &(pool->data[pool->idx]);
+    }
+}
+
+typedef enum{
+    // initial state, waiting for client hello
+    // when received client hello, jump to state mb_wait_server_hello
+    mb_wait_client_hello,
+
+    // wait for server hello
+    // when received server hello, jump to state mb_handshake_done
+    // when received hello retry, jump to state mb_wait_client_hello
+    mb_wait_server_hello,
+
+    // handshake is done
+    mb_handshake_done
+} MBState;
+
+struct MBTLSConnection{
+    MBState state;
+    int client_socket_fd;
+    int server_socket_fd;
+
+    struct client_hello_str * client_hello;
+    struct server_hello_str * server_hello;
+
+    // compute and store master secret, early_traffic_secret, traffic_secret, etc
+};
 
 void print_auth_method(unsigned char method){
     printf("authentication method is: ");
@@ -118,15 +156,16 @@ void forward_data(int one, int another){
 // when received the n'th client hello, middlebox record A_{n}
 // when received the n'th server hello, middlebox compute a_{n} = A_{n-1}^alpha
 // when received application data, try to decrypt and do DPI
-void asymmetric_handle_connection(int client_fd, int server_fd){
+void asymmetric_inspect(int client_fd, int server_fd){
     fd_set read_fds;
-    char buffer[2048];
-    int len;
+    //char buffer[2048];
+    //char * buffer = memory_pool_malloc(&mem_pool, 2048);
+    struct MBTLSConnection conn;
+    conn.state = mb_wait_client_hello;
+    conn.client_socket_fd = client_fd;
+    conn.server_socket_fd = server_fd;
 
-    printf("forward_data is called\n");
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
+    //int len;
     int big;
     if(client_fd > server_fd){
         big = client_fd;
@@ -135,7 +174,6 @@ void asymmetric_handle_connection(int client_fd, int server_fd){
     }
 
     // record the TLS handshake state
-    
     while(1){
         FD_ZERO(&read_fds);
         FD_SET(client_fd, &read_fds);
@@ -149,23 +187,67 @@ void asymmetric_handle_connection(int client_fd, int server_fd){
             return;
         } else {
             if(FD_ISSET(client_fd, &read_fds)){
-                // read from one, send to another
-                len = read(client_fd, buffer, 2048);
-                if(len <= 0){
-                    // close the sockets
-                    close(client_fd);
-                    close(server_fd);
-                    return;
-                } else {
-                    printf("forward_data: read from one, send to another\n");
-                    write(server_fd, buffer, len);
+                // read from client, send to server
+                if(conn.state == mb_wait_client_hello || conn.state == mb_wait_server_hello){
+                    char * buffer = memory_pool_malloc(&mem_pool, 2048);
+                    uint32_t length = read(client_fd, buffer, 2048);
+                    char * tmp_buf = buffer;
+                    uint32_t tmp_length = length;
+                    if(length <= 0){
+                        // close the sockets
+                        close(client_fd);
+                        close(server_fd);
+                        return;
+                    }
+
+                    uint8_t content_type;
+                    uint32_t handshake_type;
+                    void * content_struct;
+                    SECStatus rv = parse_record((PRUint8 **) &buffer, (PRUint32) length, 
+                        &content_type, &handshake_type, &content_struct);
+                    
+                    if(conn.state == mb_wait_client_hello){
+                        if(content_type == content_handshake && handshake_type == ssl_hs_client_hello){
+                            // received client hello
+                            conn.state = mb_wait_server_hello;
+                            conn.client_hello = (struct client_hello_str *) *content_struct;
+                            // extract and store public key
+
+                        } else {
+                            fprintf(stderr, "asymmetric_inspect: unexpected packet\n");
+                        }
+                    } else {
+                        if(content_type == content_handshake && handshake_type == ssl_hs_server_hello){
+                            // received server hello
+                            conn.state = mb_handshake_done;
+                            conn.server_hello = (struct server_hello_str *) *content_struct;
+                            // compute handshake secrets
+                            
+                        } else {
+                            fprintf(stderr, "asymmetric_inspect: unexpected packet\n");
+                        }
+                    }
+                    // send data to server
+                    write(server_fd, tmp_buf, tmp_length);
+                } else if(conn.state == mb_handshake_done){
+
                 }
+                // uint32_t len = read(client_fd, buffer, 2048);
+                // if(len <= 0){
+                //     // close the sockets
+                //     close(client_fd);
+                //     close(server_fd);
+                //     return;
+                // } else {
+                //     printf("forward_data: read from one, send to another\n");
+                //     write(server_fd, buffer, len);
+                // }
             } else {
                 //fprintf(stderr, "one is not set\n");
             }
 
             if(FD_ISSET(server_fd, &read_fds)){
-                // read from another, send to one
+                // read from server, send to client
                 len = read(server_fd, buffer, 2048);
                 if(len <= 0){
                     // close the sockets
@@ -177,7 +259,7 @@ void asymmetric_handle_connection(int client_fd, int server_fd){
                     write(client_fd, buffer, len);
                 }
             } else {
-                fprintf(stderr, "another is not set\n");
+                //fprintf(stderr, "another is not set\n");
             }
         }
     }
