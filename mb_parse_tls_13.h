@@ -2,16 +2,31 @@
 #define __mb_parse_tls_13_h
 
 #include "sslt.h" // /nss/lib/ssl/sslt.h
-#include "ssl3ext.h" // /nss/lib/ssl/ssl3ext.h
-#include "prclist.h" // /nspr/pr/include/prclist.h
-#include "ssl3prot.h" // 
+#include "prclist.h"
 
 // later we should replace malloc with customized memory management functions
+
+// TLSExtension copied from nss/lib/ssl/ssl3ext.h
+typedef struct TLSExtensionStr {
+    PRCList link;  /* The linked list link */
+    PRUint16 type; /* Extension type */
+    SECItem data;  /* Pointers into the handshake data. */
+} TLSExtension;
+
+// copird from nss/lib/ssl/ssl3prot.h
+typedef enum {
+    content_change_cipher_spec = 20,
+    content_alert = 21,
+    content_handshake = 22,
+    content_application_data = 23,
+    content_alt_handshake = 24,
+    content_ack = 25
+} SSL3ContentType;
 
 struct server_hello_str{
     uint16_t legacy_version;// should be 0x0303 (tls 1.2), consumes 2 bytes
     uint8_t * random;// random consumes 32 bytes
-    SECItem * legacy_session_id;// <0..32> length field consumes 1 byte
+    SECItem legacy_session_id;// <0..32> length field consumes 1 byte
     uint16_t cipher_suit;// consumes 2 bytes
     uint8_t legacy_compression_method;// consume 1 byte, should be 0
     SECItem extensions;// <6..2^16-1>, length field consumes 2 bytes
@@ -95,6 +110,6 @@ SECStatus parse_client_hello(struct client_hello_str * client_hello,
     PRUint8 ** buffer, PRUint32 * length);
 
 SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type, 
-    uint32_t * handshake_type, void * content_struct);
+    uint32_t * handshake_type, void ** content_struct);
 
 #endif

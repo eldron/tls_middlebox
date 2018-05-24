@@ -118,7 +118,7 @@ ssl3_ConsumeHandshakeVariable(SECItem *i, PRUint32 bytes,
 
 char * get_ext_name(uint16_t type){
     switch(type){
-        case ssl_server_name_xtn:
+        case ssl_server_name_xtn:// defined in sslt.h
         return "server_name_xtn";
         case ssl_cert_status_xtn:
         return "cert_status_xtn";
@@ -330,27 +330,38 @@ SECStatus parse_client_hello(struct client_hello_str * client_hello,
 }
 
 SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type, 
-    uint32_t * handshake_type, void * content_struct){
+    uint32_t * handshake_type, void ** content_struct){
+
+        //fprintf(stderr, "parse_record called\n");
+
         SECStatus rv;
-        *content_type = (*buffer)[0];// content type consumes 1 byte
+        //fprintf(stderr, "fuck you\n");
+        *content_type = (uint8_t) (*buffer)[0];// content type consumes 1 byte
+        //fprintf(stderr, "fuck you again\n");
+        //fprintf(stderr, "parse_record: content_type is %u\n", *content_type);
+
         *buffer += 3;// legacy record version consumes 2 bytes
         uint16_t * ptr = (uint16_t *) (*buffer);
-        uint16_t length = ntohs(*ptr);
+        uint32_t length = ntohs(*ptr);
+        //fprintf(stderr, "parse_record: content length = %u\n", length);
         *buffer += 2;// length field consumes 2 bytes
         if(length > (len - 5)){
             fprintf(stderr, "parse_record error, length larger than (len - 5)\n");
             return SECFailure;
         } else {
             if(*content_type == content_handshake){
+                //fprintf(stderr, "parse_record: content type is content_handshake\n");
                 PRUint32 msg_type;
                 PRUint32 handshake_length;
                 ssl3_ConsumeHandshakeNumber(&msg_type, 1, buffer, &length);// handshake type consumes 1 byte
                 ssl3_ConsumeHandshakeNumber(&handshake_length, 3, buffer, &length);// handshake length consumes 3 bytes
-                if(msg_type == ssl_hs_client_hello){
+                if(msg_type == ssl_hs_client_hello/* defined in sslt.h*/){
                     // parse client hello
+                    //fprintf(stderr, "parse_record: parsing client hello\n");
                     *handshake_type = msg_type;
-                    struct client_hello_str * client_hello = (struct client_hello_str *) malloc(sizeof(client_hello_str));
+                    struct client_hello_str * client_hello = (struct client_hello_str *) malloc(sizeof(struct client_hello_str));
                     rv = parse_client_hello(client_hello, buffer, &handshake_length);
+                    *content_struct = client_hello;
                     if(rv == SECFailure){
                         fprintf(stderr, "parse_record: error parse_client_hello\n");
                     }
@@ -358,11 +369,12 @@ SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type,
                 } else if (msg_type == ssl_hs_server_hello){
                     // parse server hello
                     *handshake_type = msg_type;
-                    struct server_hello_str * server_hello = (struct server_hello_str *) malloc(sizeof(server_hello_str));
+                    struct server_hello_str * server_hello = (struct server_hello_str *) malloc(sizeof(struct server_hello_str));
                     rv = parse_server_hello(server_hello, buffer, &handshake_length);
                     if(rv == SECFailure){
                         fprintf(stderr, "parse_record: error parse_server_hello\n");
                     }
+                    *content_struct = server_hello;
                     return rv;
                 } else {
                     fprintf(stderr, "parse_record: unimplemented handshake type\n");

@@ -6,6 +6,10 @@
         "ssl3ext.h": "c",
         "array": "c",
         "string_view": "c",
-        "mb_parse_tls_13.h": "c"
+        "mb_parse_tls_13.h": "c",
+        "ssl3prot.h": "c",
+        "sslt.h": "c",
+        "prclist.h": "c",
+        "*.tcc": "c"
     }
 }
