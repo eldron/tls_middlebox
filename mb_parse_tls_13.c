@@ -386,3 +386,13 @@ SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type,
             }
         }
 }
+
+int is_hello_retry(struct server_hello_str * server_hello){
+    int result = memcmp(server_hello->random, ssl_hello_retry_random, 32);
+    return result == 0;
+}
+
+// compute handshake secrets
+void compute_handshake_secrets(struct MBTLSConnection * conn){
+
+}

@@ -10,6 +10,7 @@
         "ssl3prot.h": "c",
         "sslt.h": "c",
         "prclist.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "fstream": "c"
     }
 }

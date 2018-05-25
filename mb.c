@@ -13,51 +13,11 @@
 #include <stdint.h>
 
 #include "mb_parse_tls_13.h"
+#include "mb_memory_pool.h"
 
 // later we should replace malloc with customized memory management functions
 
-struct memory_pool{
-    char * data;
-    uint32_t idx;
-    uint32_t length; // max length of this memory pool
-};
-
 struct memory_pool mem_pool;
-
-char * memory_pool_malloc(struct memory_pool * pool, uint32_t len){
-    if(pool->idx + len > pool->length){
-        return NULL;
-    } else {
-        uint32_t tmp = pool->idx;
-        pool->idx += len;
-        return &(pool->data[pool->idx]);
-    }
-}
-
-typedef enum{
-    // initial state, waiting for client hello
-    // when received client hello, jump to state mb_wait_server_hello
-    mb_wait_client_hello,
-
-    // wait for server hello
-    // when received server hello, jump to state mb_handshake_done
-    // when received hello retry, jump to state mb_wait_client_hello
-    mb_wait_server_hello,
-
-    // handshake is done
-    mb_handshake_done
-} MBState;
-
-struct MBTLSConnection{
-    MBState state;
-    int client_socket_fd;
-    int server_socket_fd;
-
-    struct client_hello_str * client_hello;
-    struct server_hello_str * server_hello;
-
-    // compute and store master secret, early_traffic_secret, traffic_secret, etc
-};
 
 void print_auth_method(unsigned char method){
     printf("authentication method is: ");
@@ -188,7 +148,7 @@ void asymmetric_inspect(int client_fd, int server_fd){
         } else {
             if(FD_ISSET(client_fd, &read_fds)){
                 // read from client, send to server
-                if(conn.state == mb_wait_client_hello || conn.state == mb_wait_server_hello){
+                if(conn.state == mb_wait_client_hello){
                     char * buffer = memory_pool_malloc(&mem_pool, 2048);
                     uint32_t length = read(client_fd, buffer, 2048);
                     char * tmp_buf = buffer;
@@ -205,58 +165,96 @@ void asymmetric_inspect(int client_fd, int server_fd){
                     void * content_struct;
                     SECStatus rv = parse_record((PRUint8 **) &buffer, (PRUint32) length, 
                         &content_type, &handshake_type, &content_struct);
-                    
-                    if(conn.state == mb_wait_client_hello){
-                        if(content_type == content_handshake && handshake_type == ssl_hs_client_hello){
-                            // received client hello
-                            conn.state = mb_wait_server_hello;
-                            conn.client_hello = (struct client_hello_str *) *content_struct;
-                            // extract and store public key
+                    if(rv == SECFailure){
+                        fprintf(stderr, "asdymmetric inspect: error parsing record\n");
+                    }
 
-                        } else {
-                            fprintf(stderr, "asymmetric_inspect: unexpected packet\n");
-                        }
+                    if(content_type == content_handshake && handshake_type == ssl_hs_client_hello){
+                        // received client hello
+                        conn.state = mb_wait_server_hello;
+                        conn.client_hello = (struct client_hello_str *) content_struct;
+                        // extract and store public key
+
                     } else {
-                        if(content_type == content_handshake && handshake_type == ssl_hs_server_hello){
-                            // received server hello
-                            conn.state = mb_handshake_done;
-                            conn.server_hello = (struct server_hello_str *) *content_struct;
-                            // compute handshake secrets
-                            
-                        } else {
-                            fprintf(stderr, "asymmetric_inspect: unexpected packet\n");
-                        }
+                        fprintf(stderr, "asymmetric_inspect: unexpected packet from client\n");
                     }
                     // send data to server
                     write(server_fd, tmp_buf, tmp_length);
                 } else if(conn.state == mb_handshake_done){
+                    // read data from client, do inspection, then send to server
 
+                } else {
+                    // read data from client, then send to server
+                    char buf[2048];
+                    int len = read(client_fd, buf, 2048);
+                    if(len <= 0){
+                        close(client_fd);
+                        close(server_fd);
+                        return;
+                    } else {
+                        write(server_fd, buf, len);
+                    }
                 }
-                // uint32_t len = read(client_fd, buffer, 2048);
-                // if(len <= 0){
-                //     // close the sockets
-                //     close(client_fd);
-                //     close(server_fd);
-                //     return;
-                // } else {
-                //     printf("forward_data: read from one, send to another\n");
-                //     write(server_fd, buffer, len);
-                // }
             } else {
                 //fprintf(stderr, "one is not set\n");
             }
 
             if(FD_ISSET(server_fd, &read_fds)){
-                // read from server, send to client
-                len = read(server_fd, buffer, 2048);
-                if(len <= 0){
-                    // close the sockets
-                    close(client_fd);
-                    close(server_fd);
-                    return;
+                if(conn.state == mb_wait_server_hello){
+                    char * buffer = memory_pool_malloc(&mem_pool, 2048);
+                    uint32_t length = read(client_fd, buffer, 2048);
+                    char * tmp_buf = buffer;
+                    uint32_t tmp_length = length;
+                    if(length <= 0){
+                        // close the sockets
+                        close(client_fd);
+                        close(server_fd);
+                        return;
+                    }
+
+                    uint8_t content_type;
+                    uint32_t handshake_type;
+                    void * content_struct;
+                    SECStatus rv = parse_record((PRUint8 **) &buffer, (PRUint32) length, 
+                        &content_type, &handshake_type, &content_struct);
+                    if(rv == SECFailure){
+                        fprintf(stderr, "asdymmetric inspect: error parsing record\n");
+                    }
+                    if(content_type == content_handshake && handshake_type == ssl_hs_server_hello){
+                        // if received hello retry, set state to mb_wait_client_hello
+                        // if received server hello, set state to mb_handshake_done
+                        conn.server_hello = (struct server_hello_str *) content_struct;
+                        if(is_hello_retry(conn.server_hello)){
+                            conn.state = mb_wait_client_hello;
+                            write(client_fd, tmp_buf, tmp_length);
+                            memory_pool_free(&mem_pool, 2048);
+                        } else {
+                            conn.state = mb_handshake_done;
+                            // compute and store handshake secrets
+                            compute_handshake_secrets(&conn);
+                            write(client_fd, tmp_buf, tmp_length);
+                        }
+                    } else {
+                        fprintf(stderr, "asymmetric inspect: received unexpected packet from server\n");
+                        // send data to client
+                        write(client_fd, tmp_buf, tmp_length);
+                        // retrieve memory
+                        memory_pool_free(&mem_pool, 2048);
+                    }
+                } else if(conn.state == mb_handshake_done){
+                    // read data from server, do inspection, then send to client
+                    
                 } else {
-                    printf("forward_data: read from another, send to one\n");
-                    write(client_fd, buffer, len);
+                    // read from server, send to client
+                    char buf[2048];
+                    int len = read(server_fd, buf, 2048);
+                    if(len <= 0){
+                        close(client_fd);
+                        close(server_fd);
+                        return;
+                    } else {
+                        write(client_fd, buf, len);
+                    }
                 }
             } else {
                 //fprintf(stderr, "another is not set\n");
@@ -264,6 +262,7 @@ void asymmetric_inspect(int client_fd, int server_fd){
         }
     }
 }
+
 void * handle_connection(void * sock){
     int client_fd = *(int *) sock;
     int len;

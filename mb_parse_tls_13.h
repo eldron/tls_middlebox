@@ -6,6 +6,14 @@
 
 // later we should replace malloc with customized memory management functions
 
+
+const PRUint8 ssl_hello_retry_random[] = {
+    0xCF, 0x21, 0xAD, 0x74, 0xE5, 0x9A, 0x61, 0x11,
+    0xBE, 0x1D, 0x8C, 0x02, 0x1E, 0x65, 0xB8, 0x91,
+    0xC2, 0xA2, 0x11, 0x16, 0x7A, 0xBB, 0x8C, 0x5E,
+    0x07, 0x9E, 0x09, 0xE2, 0xC8, 0xA8, 0x33, 0x9C
+};
+
 // TLSExtension copied from nss/lib/ssl/ssl3ext.h
 typedef struct TLSExtensionStr {
     PRCList link;  /* The linked list link */
@@ -112,4 +120,30 @@ SECStatus parse_client_hello(struct client_hello_str * client_hello,
 SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type, 
     uint32_t * handshake_type, void ** content_struct);
 
+int is_hello_retry(struct server_hello_str * server_hello);
+
+typedef enum{
+    // initial state, waiting for client hello
+    // when received client hello, jump to state mb_wait_server_hello
+    mb_wait_client_hello,
+
+    // wait for server hello
+    // when received server hello, jump to state mb_handshake_done
+    // when received hello retry, jump to state mb_wait_client_hello
+    mb_wait_server_hello,
+
+    // handshake is done
+    mb_handshake_done
+} MBState;
+
+struct MBTLSConnection{
+    MBState state;
+    int client_socket_fd;
+    int server_socket_fd;
+
+    struct client_hello_str * client_hello;
+    struct server_hello_str * server_hello;
+
+    // compute and store master secret, early_traffic_secret, traffic_secret, etc
+};
 #endif

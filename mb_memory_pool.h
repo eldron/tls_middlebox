@@ -11,4 +11,5 @@ struct memory_pool{
 
 char * memory_pool_malloc(struct memory_pool * pool, uint32_t len);
 
+void memory_pool_free(struct mem_pool * pool, uint32_t len);
 #endif

@@ -9,3 +9,7 @@ char * memory_pool_malloc(struct memory_pool * pool, uint32_t len){
         return &(pool->data[pool->idx]);
     }
 }
+
+void memory_pool_free(struct mem_pool * pool, uint32_t len){
+    pool->idx -= len;
+}
