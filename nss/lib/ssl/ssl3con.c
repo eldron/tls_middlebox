@@ -4534,6 +4534,22 @@ SECStatus
 ssl3_SendClientHello(sslSocket *ss, sslClientHelloType type)
 {
     fprintf(stderr, "ssl3_SendClientHello is called\n");
+    if(type == client_hello_retry){
+        fprintf(stderr, "type is client_hello_retry\n");
+    } else if(type == client_hello_initial){
+        fprintf(stderr, "type is client_hello_initial\n");
+    } else if(type == client_hello_retransmit){
+        fprintf(stderr, "type is client_hello_retransmit\n");
+    } else if(type == client_hello_renegotiation){
+        fprintf(stderr, "type is client_hello_renegotiation\n");
+    } else {
+        fprintf(stderr, "unknown sslClientHelloType\n");
+    }
+    if(ss->firstHsDone){
+        fprintf(stderr, "firstHsDone is set\n");
+    } else {
+        fprintf(stderr, "firstHsDone is not set\n");
+    }
     
     sslSessionID *sid;
     SECStatus rv;
@@ -4815,6 +4831,20 @@ ssl3_SendClientHello(sslSocket *ss, sslClientHelloType type)
 
     fallbackSCSV = ss->opt.enableFallbackSCSV && (!requestingResume ||
                                                   version < sid->version);
+
+    if(fallbackSCSV){
+        // should not be set
+        fprintf(stderr, "fallbackSCSV set\n");
+    } else {
+        fprintf(stderr, "fallbackSCSV not set\n");
+    }
+    if(ss->ssl3.hs.sendingSCSV){
+        // should not be set
+        fprintf(stderr, "sendingSCSV set\n");
+    } else {
+        fprintf(stderr, "sendingSCSV not set\n");
+    }
+    
     /* make room for SCSV */
     if (ss->ssl3.hs.sendingSCSV) {
         ++num_suites;

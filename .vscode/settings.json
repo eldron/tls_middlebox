@@ -12,6 +12,8 @@
         "prclist.h": "c",
         "*.tcc": "c",
         "fstream": "c",
-        "sslimpl.h": "c"
+        "sslimpl.h": "c",
+        "chrono": "c",
+        "limits": "c"
     }
 }

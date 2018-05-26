@@ -578,6 +578,465 @@ SECStatus compute_handshake_secrets_from_server_hello(struct MBTLSConnection * c
 
 // caled when middlebox received client hello
 // buffer now points to the record layer
-SECStatus set_ss_from_client_hello(MBTLSConnection * conn, uint8_t * buffer, uint32_t length){
+// we should maintain the state indicating whether we are responding to a client hello retry
+// the caller should chck the client hello is a tls 1.3 client hello
+// the caller should set type to client_hello_retry or client_hello_initial
+// the caller is reponsible for setting sid for conn->ss
+SECStatus set_ss_from_client_hello(struct MBTLSConnection * conn, 
+    sslClientHelloType type, uint8_t * buffer, uint32_t length){
+    
+    // we don't need to consider fall back SCSV
+    sslSocket * ss = conn->ss;
+    ss->sec.isServer = PR_FALSE;
+    SECStatus rv = ssl_CheckConfigSanity(ss);
+    if (rv != SECSuccess){
+        fprintf(stderr, "ssl_CheckConfigSanity failed\n");
+    }
+    
+    ss->vrange.max = SSL_LIBRARY_VERSION_TLS_1_3;// or encoded 
+    sslSessionID *sid;
+    SECStatus rv;
+    unsigned int i;
+    unsigned int length;
+    unsigned int num_suites;
+    unsigned int actual_count = 0;
+    PRBool isTLS = PR_TRUE;
+    PRBool requestingResume = PR_FALSE, fallbackSCSV = PR_FALSE;
+    PRBool unlockNeeded = PR_FALSE;
+    sslBuffer extensionBuf = SSL_BUFFER_EMPTY;
+    PRUint16 version = conn->ss->vrange.max;
+    PRInt32 flags;
+    unsigned int cookieLen = conn->ss->ssl3.hs.cookie.len;
 
+    /* shouldn't get here if SSL3 is disabled, but ... */
+    if (SSL_ALL_VERSIONS_DISABLED(&ss->vrange)) {
+        fprintf(stderr, "no versions of SSL 3.0 or later are enabled\n");
+        return SECFailure;
+    }
+
+    /* If there's an sid set from an external cache, use it. */
+    if (ss->sec.ci.sid && ss->sec.ci.sid->cached == in_external_cache) {
+        sid = ss->sec.ci.sid;
+        SSL_TRC(3, ("%d: SSL[%d]: using external token", SSL_GETPID(), ss->fd));
+    } else if (!ss->opt.noCache) {
+        /* Try to find server in our session-id cache */
+        sid = ssl_LookupSID(&ss->sec.ci.peer, ss->sec.ci.port, ss->peerID,
+                            ss->url);
+    }
+    if (sid) {
+        if (sid->version >= ss->vrange.min && sid->version <= ss->vrange.max) {
+            // this should matter
+            //PORT_Assert(!ss->sec.localCert);
+            //ss->sec.localCert = CERT_DupCertificate(sid->localCert);
+        } else {
+            ssl_UncacheSessionID(ss);
+            ssl_FreeSID(sid);
+            sid = NULL;
+        }
+    }
+    if (!sid) {
+        sid = PORT_ZNew(sslSessionID);
+        if (!sid) {
+            goto loser;
+        }
+        sid->references = 1;
+        sid->cached = never_cached;
+        sid->addr = ss->sec.ci.peer;
+        sid->port = ss->sec.ci.port;
+        // we may need to modify this
+        if (ss->peerID != NULL) {
+            sid->peerID = PORT_Strdup(ss->peerID);
+        }
+        if (ss->url != NULL) {
+            sid->urlSvrName = PORT_Strdup(ss->url);
+        }
+    }
+    ss->sec.ci.sid = sid;
+    ss->gs.state = GS_INIT;
+    
+    /* If we are responding to a HelloRetryRequest, don't reinitialize. We need
+     * to maintain the handshake hashes. */
+    // type should never be retransmit or renegotiation, only client_hello_retry
+    // or client_hello_initial
+    if(type == client_hello_retry){
+        ss->ssl3.hs.helloRetry = PR_TRUE;
+        cookieLen = 0;
+    } else {
+        ss->ssl3.hs.helloRetry = PR_FALSE;
+        ssl3_RestartHandshakeHashes(ss);
+    }
+
+    if (type == client_hello_initial) {
+        ssl_SetClientHelloSpecVersion(ss, ss->ssl3.cwSpec);
+    }
+    /* These must be reset every handshake. */
+    ssl3_ResetExtensionData(&ss->xtnData, ss);
+    ss->ssl3.hs.sendingSCSV = PR_FALSE;
+    ss->ssl3.hs.preliminaryInfo = 0;
+    PORT_Assert(IS_DTLS(ss) || type != client_hello_retransmit);
+    SECITEM_FreeItem(&ss->ssl3.hs.newSessionTicket.ticket, PR_FALSE);
+    ss->ssl3.hs.receivedNewSessionTicket = PR_FALSE;
+    /* How many suites does our PKCS11 support (regardless of policy)? */
+    if (ssl3_config_match_init(ss) == 0) {
+        fprintf(stderr, "ssl3_config_match_init failed\n");
+        return SECFailure; /* ssl3_config_match_init has set error code. */
+    }
+
+    ss->firstHsDone = PR_FALSE;// renegotiation is not allowed in TlS 1.3
+    /*
+     * During a renegotiation, ss->clientHelloVersion will be used again to
+     * work around a Windows SChannel bug. Ensure that it is still enabled.
+     */
+    if (ss->firstHsDone) {
+        PORT_Assert(type != client_hello_initial);
+        if (SSL_ALL_VERSIONS_DISABLED(&ss->vrange)) {
+            PORT_SetError(SSL_ERROR_SSL_DISABLED);
+            return SECFailure;
+        }
+
+        if (ss->clientHelloVersion < ss->vrange.min ||
+            ss->clientHelloVersion > ss->vrange.max) {
+            PORT_SetError(SSL_ERROR_NO_CYPHER_OVERLAP);
+            return SECFailure;
+        }
+    }
+
+    // the caller is reponsible for setting sid
+    /* Check if we have a ss->sec.ci.sid.
+     * Check that it's not expired.
+     * If we have an sid and it comes from an external cache, we use it. */
+    if (ss->sec.ci.sid && ss->sec.ci.sid->cached == in_external_cache) {
+        PORT_Assert(!ss->sec.isServer);
+        sid = ss->sec.ci.sid;
+        SSL_TRC(3, ("%d: SSL3[%d]: using external resumption token in ClientHello",
+                    SSL_GETPID(), ss->fd));
+    } else if (!ss->opt.noCache) {
+        /* We ignore ss->sec.ci.sid here, and use ssl_Lookup because Lookup
+         * handles expired entries and other details.
+         * XXX If we've been called from ssl_BeginClientHandshake, then
+         * this lookup is duplicative and wasteful.
+         */
+        sid = ssl_LookupSID(&ss->sec.ci.peer, ss->sec.ci.port, ss->peerID, ss->url);
+    } else {
+        sid = NULL;
+    }
+
+    /* We can't resume based on a different token. If the sid exists,
+     * make sure the token that holds the master secret still exists ...
+     * If we previously did client-auth, make sure that the token that holds
+     * the private key still exists, is logged in, hasn't been removed, etc.
+     */
+    if (sid) {
+        PRBool sidOK = PR_TRUE;
+        const ssl3CipherSuiteCfg *suite;
+
+        /* Check that the cipher suite we need is enabled. */
+        suite = ssl_LookupCipherSuiteCfg(sid->u.ssl3.cipherSuite,
+                                         ss->cipherSuites);
+        PORT_Assert(suite);
+        if (!suite || !config_match(suite, ss->ssl3.policy, &ss->vrange, ss)) {
+            sidOK = PR_FALSE;
+        }
+
+        /* Check that we can recover the master secret. */
+        if (sidOK) {
+            PK11SlotInfo *slot = NULL;
+            if (sid->u.ssl3.masterValid) {
+                slot = SECMOD_LookupSlot(sid->u.ssl3.masterModuleID,
+                                         sid->u.ssl3.masterSlotID);
+            }
+            if (slot == NULL) {
+                sidOK = PR_FALSE;
+            } else {
+                PK11SymKey *wrapKey = NULL;
+                if (!PK11_IsPresent(slot) ||
+                    ((wrapKey = PK11_GetWrapKey(slot,
+                                                sid->u.ssl3.masterWrapIndex,
+                                                sid->u.ssl3.masterWrapMech,
+                                                sid->u.ssl3.masterWrapSeries,
+                                                ss->pkcs11PinArg)) == NULL)) {
+                    sidOK = PR_FALSE;
+                }
+                if (wrapKey)
+                    PK11_FreeSymKey(wrapKey);
+                PK11_FreeSlot(slot);
+                slot = NULL;
+            }
+        }
+        /* If we previously did client-auth, make sure that the token that
+        ** holds the private key still exists, is logged in, hasn't been
+        ** removed, etc.
+        */
+       // suppose we don't do client auth
+        // if (sidOK && !ssl3_ClientAuthTokenPresent(sid)) {
+        //     sidOK = PR_FALSE;
+        // }
+
+        if (sidOK) {
+            /* Set version based on the sid. */
+            if (ss->firstHsDone) {
+                /*
+                 * Windows SChannel compares the client_version inside the RSA
+                 * EncryptedPreMasterSecret of a renegotiation with the
+                 * client_version of the initial ClientHello rather than the
+                 * ClientHello in the renegotiation. To work around this bug, we
+                 * continue to use the client_version used in the initial
+                 * ClientHello when renegotiating.
+                 *
+                 * The client_version of the initial ClientHello is still
+                 * available in ss->clientHelloVersion. Ensure that
+                 * sid->version is bounded within
+                 * [ss->vrange.min, ss->clientHelloVersion], otherwise we
+                 * can't use sid.
+                 */
+                if (sid->version >= ss->vrange.min &&
+                    sid->version <= ss->clientHelloVersion) {
+                    version = ss->clientHelloVersion;
+                } else {
+                    sidOK = PR_FALSE;
+                }
+            } else {
+                /*
+                 * Check sid->version is OK first.
+                 * Previously, we would cap the version based on sid->version,
+                 * but that prevents negotiation of a higher version if the
+                 * previous session was reduced (e.g., with version fallback)
+                 */
+                if (sid->version < ss->vrange.min ||
+                    sid->version > ss->vrange.max) {
+                    sidOK = PR_FALSE;
+                }
+            }
+        }
+
+        if (!sidOK) {
+            SSL_AtomicIncrementLong(&ssl3stats.sch_sid_cache_not_ok);
+            ssl_UncacheSessionID(ss);
+            ssl_FreeSID(sid);
+            sid = NULL;
+        }
+    }
+
+    if (sid) {
+        requestingResume = PR_TRUE;
+        SSL_AtomicIncrementLong(&ssl3stats.sch_sid_cache_hits);
+
+        PRINT_BUF(4, (ss, "client, found session-id:", sid->u.ssl3.sessionID,
+                      sid->u.ssl3.sessionIDLength));
+
+        ss->ssl3.policy = sid->u.ssl3.policy;
+    } else {
+        SSL_AtomicIncrementLong(&ssl3stats.sch_sid_cache_misses);
+
+        /*
+         * Windows SChannel compares the client_version inside the RSA
+         * EncryptedPreMasterSecret of a renegotiation with the
+         * client_version of the initial ClientHello rather than the
+         * ClientHello in the renegotiation. To work around this bug, we
+         * continue to use the client_version used in the initial
+         * ClientHello when renegotiating.
+         */
+        if (ss->firstHsDone) {
+            version = ss->clientHelloVersion;
+        }
+
+        sid = ssl3_NewSessionID(ss, PR_FALSE);
+        if (!sid) {
+            return SECFailure; /* memory error is set */
+        }
+        /* ss->version isn't set yet, but the sid needs a sane value. */
+        sid->version = version;
+    }
+
+    isTLS = (version > SSL_LIBRARY_VERSION_3_0);
+    ssl_GetSpecWriteLock(ss);
+    if (ss->ssl3.cwSpec->macDef->mac == ssl_mac_null) {
+        /* SSL records are not being MACed. */
+        ss->ssl3.cwSpec->version = version;
+    }
+    ssl_ReleaseSpecWriteLock(ss);
+
+    if (ss->sec.ci.sid != NULL) {
+        ssl_FreeSID(ss->sec.ci.sid); /* decrement ref count, free if zero */
+    }
+    ss->sec.ci.sid = sid;
+
+    /* When we attempt session resumption (only), we must lock the sid to
+     * prevent races with other resumption connections that receive a
+     * NewSessionTicket that will cause the ticket in the sid to be replaced.
+     * Once we've copied the session ticket into our ClientHello message, it
+     * is OK for the ticket to change, so we just need to make sure we hold
+     * the lock across the calls to ssl_ConstructExtensions.
+     */
+    if (sid->u.ssl3.lock) {
+        unlockNeeded = PR_TRUE;
+        PR_RWLock_Rlock(sid->u.ssl3.lock);
+    }
+
+    if (ss->vrange.max >= SSL_LIBRARY_VERSION_TLS_1_3 &&
+        type == client_hello_initial) {
+        //rv = tls13_SetupClientHello(ss);
+        // we read client hello and set corresponding values in ss
+        if (rv != SECSuccess) {
+            goto loser;
+        }
+    }
+    if (isTLS || (ss->firstHsDone && ss->peerRequestedProtection)) {
+        //rv = ssl_ConstructExtensions(ss, &extensionBuf, ssl_hs_client_hello);
+        // we read client hello and set corresponding values in ss
+        if (rv != SECSuccess) {
+            goto loser;
+        }
+    }
+
+    /* how many suites are permitted by policy and user preference? */
+    //num_suites = count_cipher_suites(ss, ss->ssl3.policy);
+    // we read num_suites from client hello
+    if (!num_suites) {
+        goto loser; /* count_cipher_suites has set error code. */
+    }
+
+    length = sizeof(SSL3ProtocolVersion) + SSL3_RANDOM_LENGTH +
+             1 + /* session id */
+             2 + num_suites * sizeof(ssl3CipherSuite) +
+             1 + 1 /* compression methods */;
+    if (sid->version < SSL_LIBRARY_VERSION_TLS_1_3) {
+        length += sid->u.ssl3.sessionIDLength;
+    } else if (ss->opt.enableTls13CompatMode && !IS_DTLS(ss)) {
+        length += SSL3_SESSIONID_BYTES;
+    }
+
+    if (extensionBuf.len) {
+        rv = ssl_InsertPaddingExtension(ss, length, &extensionBuf);
+        if (rv != SECSuccess) {
+            goto loser; /* err set by ssl_InsertPaddingExtension */
+        }
+        length += 2 + extensionBuf.len;
+    }
+
+    rv = ssl3_AppendHandshakeHeader(ss, ssl_hs_client_hello, length);
+    if (rv != SECSuccess) {
+        goto loser; /* err set by ssl3_AppendHandshake* */
+    }
+
+    ss->clientHelloVersion = PR_MIN(version, SSL_LIBRARY_VERSION_TLS_1_2);
+    rv = ssl3_AppendHandshakeNumber(ss, ss->clientHelloVersion, 2);
+
+    /* Generate a new random if this is the first attempt. */
+    // we read random from client hello and set the cooresponding values
+    if (type == client_hello_initial) {
+        rv = ssl3_GetNewRandom(ss->ssl3.hs.client_random);
+        if (rv != SECSuccess) {
+            goto loser; /* err set by GetNewRandom. */
+        }
+    }
+    rv = ssl3_AppendHandshake(ss, ss->ssl3.hs.client_random,
+                              SSL3_RANDOM_LENGTH);
+    if (rv != SECSuccess) {
+        goto loser; /* err set by ssl3_AppendHandshake* */
+    }
+
+    // we read sessionID from client hello and set ss
+    if (sid->version < SSL_LIBRARY_VERSION_TLS_1_3) {
+        // this should not happen
+        rv = ssl3_AppendHandshakeVariable(
+            ss, sid->u.ssl3.sessionID, sid->u.ssl3.sessionIDLength, 1);
+    } else if (ss->opt.enableTls13CompatMode && !IS_DTLS(ss)) {
+        /* We're faking session resumption, so rather than create new
+         * randomness, just mix up the client random a little. */
+        PRUint8 buf[SSL3_SESSIONID_BYTES];
+        ssl_MakeFakeSid(ss, buf);
+        rv = ssl3_AppendHandshakeVariable(ss, buf, SSL3_SESSIONID_BYTES, 1);
+    } else {
+        rv = ssl3_AppendHandshakeNumber(ss, 0, 1);
+    }
+    if (rv != SECSuccess) {
+        goto loser; /* err set by ssl3_AppendHandshake* */
+    }
+
+    rv = ssl3_AppendHandshakeNumber(ss, num_suites * sizeof(ssl3CipherSuite), 2);
+    if (rv != SECSuccess) {
+        goto loser; /* err set by ssl3_AppendHandshake* */
+    }
+
+    // we read cipher suits from client hello and set ss
+    for (i = 0; i < ssl_V3_SUITES_IMPLEMENTED; i++) {
+        ssl3CipherSuiteCfg *suite = &ss->cipherSuites[i];
+        if (config_match(suite, ss->ssl3.policy, &ss->vrange, ss)) {
+            actual_count++;
+            if (actual_count > num_suites) {
+                /* set error card removal/insertion error */
+                PORT_SetError(SSL_ERROR_TOKEN_INSERTION_REMOVAL);
+                goto loser;
+            }
+            rv = ssl3_AppendHandshakeNumber(ss, suite->cipher_suite,
+                                            sizeof(ssl3CipherSuite));
+            if (rv != SECSuccess) {
+                goto loser; /* err set by ssl3_AppendHandshake* */
+            }
+        }
+    }
+
+    /* Compression methods: count is always 1, null compression. */
+    // we may not need to modify this
+    rv = ssl3_AppendHandshakeNumber(ss, 1, 1);
+    if (rv != SECSuccess) {
+        goto loser; /* err set by ssl3_AppendHandshake* */
+    }
+    rv = ssl3_AppendHandshakeNumber(ss, ssl_compression_null, 1);
+    if (rv != SECSuccess) {
+        goto loser; /* err set by ssl3_AppendHandshake* */
+    }
+
+    // we read psk binders from client hello and set ss
+    if (extensionBuf.len) {
+        /* If we are sending a PSK binder, replace the dummy value.  Note that
+         * we only set statelessResume on the client in TLS 1.3. */
+        if (ss->statelessResume &&
+            ss->xtnData.sentSessionTicketInClientHello) {
+            rv = tls13_WriteExtensionsWithBinder(ss, &extensionBuf);
+        } else {
+            rv = ssl3_AppendBufferToHandshakeVariable(ss, &extensionBuf, 2);
+        }
+        if (rv != SECSuccess) {
+            goto loser; /* err set by AppendHandshake. */
+        }
+    }
+
+    sslBuffer_Clear(&extensionBuf);
+    if (unlockNeeded) {
+        /* Note: goto loser can't be used past this point. */
+        PR_RWLock_Unlock(sid->u.ssl3.lock);
+    }
+
+    // we read session ticket from client hello and set ss
+    if (ss->xtnData.sentSessionTicketInClientHello) {
+        SSL_AtomicIncrementLong(&ssl3stats.sch_sid_stateless_resumes);
+    }
+
+    // modify this
+    flags = 0;
+    rv = ssl3_FlushHandshake(ss, flags);
+    if (rv != SECSuccess) {
+        return rv; /* error code set by ssl3_FlushHandshake */
+    }
+
+    // we read early data from client hello and set ss
+    if (version >= SSL_LIBRARY_VERSION_TLS_1_3) {
+        rv = tls13_MaybeDo0RTTHandshake(ss);
+        if (rv != SECSuccess) {
+            return SECFailure; /* error code set already. */
+        }
+    }
+
+    ss->ssl3.hs.ws = wait_server_hello;
+    return SECSuccess;
+
+    // we should not need this goto
+loser:
+    if (unlockNeeded) {
+        PR_RWLock_Unlock(sid->u.ssl3.lock);
+    }
+    sslBuffer_Clear(&extensionBuf);
+    return SECFailure;
 }
