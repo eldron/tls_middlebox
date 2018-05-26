@@ -582,6 +582,8 @@ SECStatus compute_handshake_secrets_from_server_hello(struct MBTLSConnection * c
 // the caller should chck the client hello is a tls 1.3 client hello
 // the caller should set type to client_hello_retry or client_hello_initial
 // the caller is reponsible for setting sid for conn->ss
+// if we set client to not use stateless resumption, caller should set ss->sec.ci.sid = NULL,
+// and ss->opt.noCache = PR_TRUE
 SECStatus set_ss_from_client_hello(struct MBTLSConnection * conn, 
     sslClientHelloType type, uint8_t * buffer, uint32_t length){
     
@@ -653,7 +655,7 @@ SECStatus set_ss_from_client_hello(struct MBTLSConnection * conn,
     }
     ss->sec.ci.sid = sid;
     ss->gs.state = GS_INIT;
-    
+
     /* If we are responding to a HelloRetryRequest, don't reinitialize. We need
      * to maintain the handshake hashes. */
     // type should never be retransmit or renegotiation, only client_hello_retry
@@ -671,7 +673,7 @@ SECStatus set_ss_from_client_hello(struct MBTLSConnection * conn,
     }
     /* These must be reset every handshake. */
     ssl3_ResetExtensionData(&ss->xtnData, ss);
-    ss->ssl3.hs.sendingSCSV = PR_FALSE;
+    ss->ssl3.hs.sendingSCSV = PR_FALSE;// fallbackSCSV and sendingSCSV are always not set in TLS 1.3
     ss->ssl3.hs.preliminaryInfo = 0;
     PORT_Assert(IS_DTLS(ss) || type != client_hello_retransmit);
     SECITEM_FreeItem(&ss->ssl3.hs.newSessionTicket.ticket, PR_FALSE);
