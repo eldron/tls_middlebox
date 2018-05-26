@@ -181,8 +181,8 @@ SECStatus simple_handle_connection(PRFileDesc * sslSocket){
 		exitErr("PORT_Alloc");
 	}
 
-	/* compose the http request here. */
-
+	fprintf(stderr, "simple_handle_connection: before PR_Write is called\n");
+	// when PR_Write is called, tls connection is made, tls3_SendClientHello is called
 	numBytes = PR_Write(sslSocket, requestString, strlen(requestString));
 	if (numBytes <= 0) {
 		errWarn("PR_Write");
@@ -330,6 +330,7 @@ do_connects(void *a, int connection)
 		return secStatus;
 	}
 
+	fprintf(stderr, "before simple_handle_connection is called\n");
 	secStatus = simple_handle_connection(sslSocket);
 	if(secStatus != SECSuccess){
 		errWarn("simple_handle_connection");

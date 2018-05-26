@@ -124,6 +124,9 @@ void asymmetric_inspect(int client_fd, int server_fd){
     conn.state = mb_wait_client_hello;
     conn.client_socket_fd = client_fd;
     conn.server_socket_fd = server_fd;
+    conn.ss = ssl_NewSocket(PR_TRUE, ssl_variant_stream);
+    conn.client_hello = NULL;
+    conn.server_hello = NULL;
 
     //int len;
     int big;
@@ -155,31 +158,42 @@ void asymmetric_inspect(int client_fd, int server_fd){
                     uint32_t tmp_length = length;
                     if(length <= 0){
                         // close the sockets
+                        memory_pool_free(&mem_pool, 2048);
                         close(client_fd);
                         close(server_fd);
                         return;
                     }
 
                     uint8_t content_type;
-                    uint32_t handshake_type;
-                    void * content_struct;
-                    SECStatus rv = parse_record((PRUint8 **) &buffer, (PRUint32) length, 
-                        &content_type, &handshake_type, &content_struct);
-                    if(rv == SECFailure){
-                        fprintf(stderr, "asdymmetric inspect: error parsing record\n");
-                    }
-
-                    if(content_type == content_handshake && handshake_type == ssl_hs_client_hello){
-                        // received client hello
-                        conn.state = mb_wait_server_hello;
-                        conn.client_hello = (struct client_hello_str *) content_struct;
-                        // extract and store public key
-
+                    content_type = (uint8_t) buffer[0];
+                    if(content_type == content_handshake){
+                        uint8_t handshake_type = (uint8_t) buffer[5];
+                        if(handshake_type == ssl_hs_client_hello){
+                            // received client hello
+                            conn.state = mb_wait_server_hello;
+                            // set ss according to the client hello we received
+                            SECStatus rv = set_ss_from_client_hello(&conn, buffer, length);
+                            if(rv == SECFailure){
+                                fprintf(stderr, "asymmetric inspect: set_ss_from_client_hello failed\n");
+                            }
+                            // send data to server, free buffer if ss does not use it
+                            write(server_fd, tmp_buf, tmp_length);
+                        } else {
+                            // this should not happen
+                            fprintf(stderr, "asymmetric inspect: waiting client hello, received unexpected packet\n");
+                            // send data to sever
+                            write(server_fd, tmp_buf, tmp_length);
+                            // free buffer
+                            memory_pool_free(&mem_pool, 2048);
+                        }
                     } else {
-                        fprintf(stderr, "asymmetric_inspect: unexpected packet from client\n");
+                        // this should not happen
+                        fprintf(stderr, "asymmetric inspect: state is wait_client_hello, received unexpected packet\n");
+                        // send data to server
+                        write(server_fd, tmp_buf, tmp_length);
+                        // free buffer
+                        memory_pool_free(&mem_pool, 2048);
                     }
-                    // send data to server
-                    write(server_fd, tmp_buf, tmp_length);
                 } else if(conn.state == mb_handshake_done){
                     // read data from client, do inspection, then send to server
 
@@ -207,38 +221,60 @@ void asymmetric_inspect(int client_fd, int server_fd){
                     uint32_t tmp_length = length;
                     if(length <= 0){
                         // close the sockets
+                        memory_pool_free(&mem_pool, 2048);
                         close(client_fd);
                         close(server_fd);
                         return;
                     }
 
-                    uint8_t content_type;
-                    uint32_t handshake_type;
-                    void * content_struct;
-                    SECStatus rv = parse_record((PRUint8 **) &buffer, (PRUint32) length, 
-                        &content_type, &handshake_type, &content_struct);
-                    if(rv == SECFailure){
-                        fprintf(stderr, "asdymmetric inspect: error parsing record\n");
-                    }
-                    if(content_type == content_handshake && handshake_type == ssl_hs_server_hello){
-                        // if received hello retry, set state to mb_wait_client_hello
-                        // if received server hello, set state to mb_handshake_done
-                        conn.server_hello = (struct server_hello_str *) content_struct;
-                        if(is_hello_retry(conn.server_hello)){
-                            conn.state = mb_wait_client_hello;
-                            write(client_fd, tmp_buf, tmp_length);
-                            memory_pool_free(&mem_pool, 2048);
+                    uint8_t content_type = (uint8_t) buffer[0];
+                    if(content_type == content_handshake){
+                        uint8_t handshake_type = (uint8_t) buffer[5];
+                        if(handshake_type == ssl_hs_server_hello){
+                            // check if we received hello retry request or server hello
+                            char * random = buffer + 10;
+                            int is_hello_retry = 0;
+                            int tmp_result = memcmp(random, ssl_hello_retry_random, 32);
+                            if(tmp_result){
+                                is_hello_retry = 0;
+                            } else {
+                                is_hello_retry = 1;
+                            }
+
+                            if(is_hello_retry){
+                                // we received hello retry request, set state to mb_wait_client_hello
+                                // send data to client, free buffer
+                                conn.state = mb_wait_client_hello;
+                                write(client_fd, tmp_buf, tmp_length);
+                                memory_pool_free(&mem_pool, 2048);
+                            } else {
+                                // we received server hello, set state to mb_handshake_done
+                                conn.state = mb_handshake_done;
+                                // compute handshake secrets
+                                SECStatus rv = compute_handshake_secrets_from_server_hello(&conn, 
+                                    buffer, length);
+                                if(rv == SECFailure){
+                                    fprintf(stderr, "asymmetric inspect: compute handshake secrets failed\n");
+                                }
+                                // send data to cleint, free buffer if ss does not use it
+                                write(client_fd, tmp_buf, tmp_length);
+                                // we should be able to free buffer
+                                memory_pool_free(&mem_pool, 2048);
+                            }
                         } else {
-                            conn.state = mb_handshake_done;
-                            // compute and store handshake secrets
-                            compute_handshake_secrets(&conn);
+                            // this should not happen
+                            fprintf(stderr, "asymmetric inspect: waiting server hello, received unexpected packet\n");
+                            // send data to client
                             write(client_fd, tmp_buf, tmp_length);
+                            // free buffer
+                            memory_pool_free(&mem_pool, 2048);
                         }
                     } else {
-                        fprintf(stderr, "asymmetric inspect: received unexpected packet from server\n");
+                        // this should not happen
+                        fprintf(stderr, "asymmetric inspect: state is wait_server_hello, received unexpected packet\n");
                         // send data to client
                         write(client_fd, tmp_buf, tmp_length);
-                        // retrieve memory
+                        // free buffer
                         memory_pool_free(&mem_pool, 2048);
                     }
                 } else if(conn.state == mb_handshake_done){

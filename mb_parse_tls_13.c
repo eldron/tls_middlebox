@@ -1,5 +1,7 @@
 #include "mb_parse_tls_13.h"
 
+#define TLS_1_3_DRAFT_VERSION 28
+
 // consume handshake functions copied from ssl3cons.c
 /* Read up the next "bytes" number of bytes from the (decrypted) input
  * stream "b" (which is *length bytes long). Copy them into buffer "v".
@@ -199,6 +201,31 @@ TLSExtension * find_extension(PRCList * extensions_list, SSLExtensionType extens
     }
 }
 
+/* Read up the next "bytes" number of bytes from the (decrypted) input
+ * stream "b" (which is *length bytes long). Copy them into buffer "v".
+ * Reduces *length by bytes.  Advances *b by bytes.
+ *
+ * If this function returns SECFailure, it has already sent an alert,
+ * and has set a generic error code.  The caller should probably
+ * override the generic error code by setting another.
+ */
+SECStatus
+ssl3_ConsumeHandshake(void *v, PRUint32 bytes, PRUint8 **b,
+                      PRUint32 *length)
+{
+    PORT_Assert(ss->opt.noLocks || ssl_HaveRecvBufLock(ss));
+    PORT_Assert(ss->opt.noLocks || ssl_HaveSSL3HandshakeLock(ss));
+
+    if ((PRUint32)bytes > *length) {
+        fprintf(stderr, "ssl3_ConsumeHandshake: bytes larger than *length\n");
+        return SECFailure;
+    }
+    PORT_Memcpy(v, *b, bytes);
+    *b += bytes;
+    *length -= bytes;
+    return SECSuccess;
+}
+
 // parse server hello
 // *buffer should point to legacy_version
 // the HelloRetryRequest message uses the same struct reu as the ServerHello, but with random
@@ -329,6 +356,65 @@ SECStatus parse_client_hello(struct client_hello_str * client_hello,
         return SECSuccess;
 }
 
+/* Go through hello extensions in |b| and deserialize
+ * them into the list in |ss->ssl3.hs.remoteExtensions|.
+ * The only checking we do in this point is for duplicates.
+ *
+ * IMPORTANT: This list just contains pointers to the incoming
+ * buffer so they can only be used during ClientHello processing.
+ */
+// *length equals to the length of all extensions
+// *length is read from *b before the function is called
+SECStatus
+ssl3_ParseExtensions(PRCList * ext_list, PRUint8 **b, PRUint32 *length)
+{
+    // /* Clean out the extensions list. */
+    // ssl3_DestroyRemoteExtensions(&ss->ssl3.hs.remoteExtensions);
+
+    while (*length) {
+        SECStatus rv;
+        PRUint32 extension_type;
+        SECItem extension_data = { siBuffer, NULL, 0 };
+        TLSExtension *extension;
+        PRCList *cursor;
+
+        /* Get the extension's type field */
+        rv = ssl3_ConsumeHandshakeNumber(&extension_type, 2, b, length);
+        if (rv != SECSuccess) {
+            return SECFailure; /* alert already sent */
+        }
+
+        // SSL_TRC(10, ("%d: SSL3[%d]: parsing extension %d",
+        //              SSL_GETPID(), ss->fd, extension_type));
+        /* Check whether an extension has been sent multiple times. */
+        for (cursor = PR_NEXT_LINK(ext_list);
+             cursor != ext_list;
+             cursor = PR_NEXT_LINK(cursor)) {
+            if (((TLSExtension *)cursor)->type == extension_type) {
+                fprintf(stderr, "extension %s has been sent multiple times\n", get_ext_name(extension_type));
+                return SECFailure;
+            }
+        }
+
+        /* Get the data for this extension, so we can pass it or skip it. */
+        rv = ssl3_ConsumeHandshakeVariable(&extension_data, 2, b, length);
+        if (rv != SECSuccess) {
+            return rv; /* alert already sent */
+        }
+
+        extension = PORT_ZNew(TLSExtension);// this needs to be modified
+        if (!extension) {
+            return SECFailure;
+        }
+
+        extension->type = (PRUint16)extension_type;
+        extension->data = extension_data;
+        PR_APPEND_LINK(&extension->link, ext_list);
+    }
+
+    return SECSuccess;
+}
+
 SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type, 
     uint32_t * handshake_type, void ** content_struct){
 
@@ -387,12 +473,111 @@ SECStatus parse_record(PRUint8 ** buffer, PRUint32 len, uint8_t * content_type,
         }
 }
 
+PRUint16
+tls13_EncodeDraftVersion(SSL3ProtocolVersion version)
+{
+#ifdef TLS_1_3_DRAFT_VERSION
+    if (version == SSL_LIBRARY_VERSION_TLS_1_3) {
+        return 0x7f00 | TLS_1_3_DRAFT_VERSION;
+    }
+#endif
+    return (PRUint16)version;
+}
+
+SECStatus
+tls13_ClientReadSupportedVersion(PRCList * ext_list)
+{
+    PRUint32 temp;
+    PRUint16 v;
+    TLSExtension *versionExtension;
+    SECItem it;
+    SECStatus rv;
+
+    /* Update the version based on the extension, as necessary. */
+    //versionExtension = ssl3_FindExtension(ss, ssl_tls13_supported_versions_xtn);
+    versionExtension = find_extension(ext_list, ssl_tls13_supported_versions_xtn);
+    if (!versionExtension) {
+        return SECSuccess;
+    }
+
+    /* Struct copy so we don't damage the extension. */
+    it = versionExtension->data;
+
+    rv = ssl3_ConsumeHandshakeNumber(&temp, 2, &it.data, &it.len);
+    if (rv != SECSuccess) {
+        return SECFailure;
+    }
+    if (it.len) {
+        //FATAL_ERROR(ss, SSL_ERROR_RX_MALFORMED_SERVER_HELLO, illegal_parameter);
+        fprintf(stderr, "tls13_ClientReadSupportedVersion: received malformed server hello\n");
+        return SECFailure;
+    }
+    v = (SSL3ProtocolVersion)temp;
+
+    /* You cannot negotiate < TLS 1.3 with supported_versions. */
+    if (v < SSL_LIBRARY_VERSION_TLS_1_3) {
+        //FATAL_ERROR(ss, SSL_ERROR_RX_MALFORMED_SERVER_HELLO, illegal_parameter);
+        fprintf(stderr, "tls13_ClientReadSupportedVersion: received malformed server hello\n");
+        return SECFailure;
+    }
+
+#ifdef TLS_1_3_DRAFT_VERSION
+    if (temp == SSL_LIBRARY_VERSION_TLS_1_3) {
+        //FATAL_ERROR(ss, SSL_ERROR_UNSUPPORTED_VERSION, protocol_version);
+        fprintf(stderr, "tls13_ClientReadSupportedVersion: unsupported version\n");
+        return SECFailure;
+    }
+    if (temp == tls13_EncodeDraftVersion(SSL_LIBRARY_VERSION_TLS_1_3)) {
+        v = SSL_LIBRARY_VERSION_TLS_1_3;
+    } else {
+        v = (SSL3ProtocolVersion)temp;
+    }
+#else
+    v = (SSL3ProtocolVersion)temp;
+#endif
+
+    ss->version = v;
+    return SECSuccess;
+}
+
 int is_hello_retry(struct server_hello_str * server_hello){
     int result = memcmp(server_hello->random, ssl_hello_retry_random, 32);
     return result == 0;
 }
 
-// compute handshake secrets
-void compute_handshake_secrets(struct MBTLSConnection * conn){
+void print_SECItem(SECItem * item){
+    int i;
+    printf("item length is %u\n", item->len);
+    for(i = 0;i < item->len;i++){
+        uint8_t value = (uint8_t) item->data[i];
+        printf("%u ", value);
+    }
+    printf("\n");
+}
+// called when middlebox received server hello
+// buffer now points to the record layer
+SECStatus compute_handshake_secrets_from_server_hello(struct MBTLSConnection * conn, 
+    uint8_t * buffer, uint32_t length){
+
+    SECStatus rv = ssl3_HandleServerHello(conn->ss, buffer + 5, length - 5);
+    if(rv == SECFailure){
+        fprintf(stderr, "compute handshake secrets: ssl3_HandleServerHello failed\n");
+        return rv;
+    }
+
+    fprintf(stderr, "computed master secret is:\n");
+    printSECItem(conn->ss->ssl3.hs.currentSecret->data);
+    // calculated master secret
+    // we still need to calculate client_application_traffic_secret_0
+    // server_application_traffic_secret_0
+    // exporter_master_secret
+    // and resumption_master_secret
+
+    return rv;
+}
+
+// caled when middlebox received client hello
+// buffer now points to the record layer
+SECStatus set_ss_from_client_hello(MBTLSConnection * conn, uint8_t * buffer, uint32_t length){
 
 }

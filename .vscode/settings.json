@@ -11,6 +11,7 @@
         "sslt.h": "c",
         "prclist.h": "c",
         "*.tcc": "c",
-        "fstream": "c"
+        "fstream": "c",
+        "sslimpl.h": "c"
     }
 }

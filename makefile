@@ -5,7 +5,7 @@ FREEBL_INCLUDE_PATH=./nss/lib/freebl
 MODIFIED_LIBRARY_PATH=./dist/Debug/lib
 LINK_FLAGS=-lfreebl3 -lnssckbi -lplc4 -lsqlite3 -lfreeblpriv3 -lnssdbm3 -lplds4 -lssl3 -lnspr4 -lnsssysinit -lsmime3 -lnss3 -lnssutil3 -lsoftokn3
 
-all:client server mb simple_tls_client simple_tls_server
+all:client server simple_tls_client simple_tls_server
 	echo 'built all'
 
 client:client.c sslsample.c
@@ -14,8 +14,8 @@ client:client.c sslsample.c
 server:server.c sslsample.c
 	gcc server.c sslsample.c -I$(NSS_INCLUDE_PATH) -I$(NSPR_INCLUDE_PATH) -I$(FREEBL_INCLUDE_PATH) -L$(NSPR_LIBRARY_PATH) $(LINK_FLAGS) -o server
 
-mb:mb.c
-	gcc mb.c -lpthread -o mb
+#mb:mb.c
+#	gcc mb.c -lpthread -o mb
 
 simple_tls_client:
 	gcc simple_tls_client.c sslsample.c -I$(NSS_INCLUDE_PATH) -I$(NSPR_INCLUDE_PATH) -I$(FREEBL_INCLUDE_PATH) -L$(MODIFIED_LIBRARY_PATH) $(LINK_FLAGS) -o simple_tls_client

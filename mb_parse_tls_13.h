@@ -1,6 +1,7 @@
 #ifndef __mb_parse_tls_13_h
 #define __mb_parse_tls_13_h
 
+#include "nss/lib/ssl/sslimpl.h"
 #include "sslt.h" // /nss/lib/ssl/sslt.h
 #include "prclist.h"
 
@@ -145,5 +146,6 @@ struct MBTLSConnection{
     struct server_hello_str * server_hello;
 
     // compute and store master secret, early_traffic_secret, traffic_secret, etc
+    sslSocket * ss;
 };
 #endif
