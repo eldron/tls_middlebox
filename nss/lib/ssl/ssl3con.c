@@ -4807,7 +4807,8 @@ ssl3_SendClientHello(sslSocket *ss, sslClientHelloType type)
 
     if (ss->vrange.max >= SSL_LIBRARY_VERSION_TLS_1_3 &&
         type == client_hello_initial) {
-        rv = tls13_SetupClientHello(ss);
+        //rv = tls13_SetupClientHello(ss);
+        rv = fake_tls13_SetupClientHello(ss, NULL, PR_FALSE);
         if (rv != SECSuccess) {
             goto loser;
         }

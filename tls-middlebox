@@ -1,7 +1,7 @@
 1. middlebox generates (alpha, g^alpha) for each curve
 2. middlebox and firefox run TLS to share g^alpha
 3. on the first tls handshake, firefox generate random a_0
-4. firefox generate fake random a_n = H(g^alpha^a_(n-1))=A_{n-1}^alpha
+4. firefox generate fake random a_n = H(g^alpha^a_(n-1))=H(A_{n-1}^alpha)
 5. middlebox can compute a_n
 6. middlebox can compute master secret (B_{n})^a_n
 

@@ -291,6 +291,7 @@ fflush U
 fopen U
 fprintf U
 fputc U
+fwrite U
 __gmon_start__ w
 HASH_Begin T
 HASH_Clone T
@@ -1149,6 +1150,7 @@ SGN_NewContextWithAlgorithmID T
 SGN_Update T
 _SGN_VerifyPKCS1DigestInfo U
 __stack_chk_fail U
+stderr U
 stdout U
 strcat U
 strchr U

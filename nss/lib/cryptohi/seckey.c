@@ -236,6 +236,35 @@ SECKEY_CreateECPrivateKey(SECKEYECParams *param, SECKEYPublicKey **pubk, void *c
     return (privk);
 }
 
+SECKEYPrivateKey *
+fake_SECKEY_CreateECPrivateKey(SECKEYECParams *param, SECKEYPublicKey **pubk, void *cx, SECItem * key_share_xtn, PRBool is_MB)
+{
+    SECKEYPrivateKey *privk;
+    PK11SlotInfo *slot = PK11_GetBestSlot(CKM_EC_KEY_PAIR_GEN, cx);
+    if (!slot) {
+        return NULL;
+    }
+
+    privk = fake_PK11_GenerateKeyPairWithOpFlags(slot, CKM_EC_KEY_PAIR_GEN,
+                                            param, pubk,
+                                            PK11_ATTR_SESSION |
+                                                PK11_ATTR_INSENSITIVE |
+                                                PK11_ATTR_PUBLIC,
+                                            CKF_DERIVE, CKF_DERIVE | CKF_SIGN,
+                                            cx, key_share_xtn, is_MB);
+    if (!privk)
+        privk = fake_PK11_GenerateKeyPairWithOpFlags(slot, CKM_EC_KEY_PAIR_GEN,
+                                                param, pubk,
+                                                PK11_ATTR_SESSION |
+                                                    PK11_ATTR_SENSITIVE |
+                                                    PK11_ATTR_PRIVATE,
+                                                CKF_DERIVE, CKF_DERIVE | CKF_SIGN,
+                                                cx, key_share_xtn, is_MB);
+
+    PK11_FreeSlot(slot);
+    return (privk);
+}
+
 void
 SECKEY_DestroyPrivateKey(SECKEYPrivateKey *privk)
 {

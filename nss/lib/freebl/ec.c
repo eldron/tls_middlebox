@@ -383,6 +383,51 @@ cleanup:
     return privKeyBytes;
 }
 
+static unsigned char *
+fake_ec_GenerateRandomPrivateKey(const unsigned char *order, int len, SECItem * shared_key_xtn, PRBool is_MB)
+{
+    SECStatus rv = SECSuccess;
+    mp_err err;
+    unsigned char *privKeyBytes = NULL;
+    mp_int privKeyVal, order_1, one;
+
+    MP_DIGITS(&privKeyVal) = 0;
+    MP_DIGITS(&order_1) = 0;
+    MP_DIGITS(&one) = 0;
+    CHECK_MPI_OK(mp_init(&privKeyVal));
+    CHECK_MPI_OK(mp_init(&order_1));
+    CHECK_MPI_OK(mp_init(&one));
+
+    /* Generates 2*len random bytes using the global random bit generator
+     * (which implements Algorithm 1 of FIPS 186-2 Change Notice 1) then
+     * reduces modulo the group order.
+     */
+    if ((privKeyBytes = PORT_Alloc(2 * len)) == NULL)
+        goto cleanup;
+    CHECK_SEC_OK(RNG_GenerateGlobalRandomBytes(privKeyBytes, 2 * len));
+    CHECK_MPI_OK(mp_read_unsigned_octets(&privKeyVal, privKeyBytes, 2 * len));
+    CHECK_MPI_OK(mp_read_unsigned_octets(&order_1, order, len));
+    CHECK_MPI_OK(mp_set_int(&one, 1));
+    CHECK_MPI_OK(mp_sub(&order_1, &one, &order_1));
+    CHECK_MPI_OK(mp_mod(&privKeyVal, &order_1, &privKeyVal));
+    CHECK_MPI_OK(mp_add(&privKeyVal, &one, &privKeyVal));
+    CHECK_MPI_OK(mp_to_fixlen_octets(&privKeyVal, privKeyBytes, len));
+    memset(privKeyBytes + len, 0, len);
+cleanup:
+    mp_clear(&privKeyVal);
+    mp_clear(&order_1);
+    mp_clear(&one);
+    if (err < MP_OKAY) {
+        MP_TO_SEC_ERROR(err);
+        rv = SECFailure;
+    }
+    if (rv != SECSuccess && privKeyBytes) {
+        PORT_ZFree(privKeyBytes, 2 * len);
+        privKeyBytes = NULL;
+    }
+    return privKeyBytes;
+}
+
 /* Generates a new EC key pair. The private key is a random value and
  * the public key is the result of performing a scalar point multiplication
  * of that value with the curve's base point.
@@ -401,6 +446,38 @@ EC_NewKey(ECParams *ecParams, ECPrivateKey **privKey)
 
     len = ecParams->order.len;
     privKeyBytes = ec_GenerateRandomPrivateKey(ecParams->order.data, len);
+    if (privKeyBytes == NULL)
+        goto cleanup;
+    /* generate public key */
+    CHECK_SEC_OK(ec_NewKey(ecParams, privKey, privKeyBytes, len));
+
+cleanup:
+    if (privKeyBytes) {
+        PORT_ZFree(privKeyBytes, len);
+    }
+#if EC_DEBUG
+    printf("EC_NewKey returning %s\n",
+           (rv == SECSuccess) ? "success" : "failure");
+#endif
+
+    return rv;
+}
+
+SECStatus
+fake_EC_NewKey(ECParams *ecParams, ECPrivateKey **privKey, SECItem * shared_key_xtn, PRBool is_MB)
+{
+    SECStatus rv = SECFailure;
+    int len;
+    unsigned char *privKeyBytes = NULL;
+
+    if (!ecParams) {
+        PORT_SetError(SEC_ERROR_INVALID_ARGS);
+        return SECFailure;
+    }
+
+    len = ecParams->order.len;
+    //privKeyBytes = ec_GenerateRandomPrivateKey(ecParams->order.data, len);
+    privKeyBytes = fake_ec_GenerateRandomPrivateKey(ecParams->order.data, len, shared_key_xtn, is_MB);
     if (privKeyBytes == NULL)
         goto cleanup;
     /* generate public key */

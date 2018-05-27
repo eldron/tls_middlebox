@@ -4709,6 +4709,8 @@ NSC_GenerateKeyPair(CK_SESSION_HANDLE hSession,
                     CK_ULONG ulPrivateKeyAttributeCount, CK_OBJECT_HANDLE_PTR phPublicKey,
                     CK_OBJECT_HANDLE_PTR phPrivateKey)
 {
+    fprintf(stderr, "NSC_GenerateKeyPair is called\n");
+
     SFTKObject *publicKey, *privateKey;
     SFTKSession *session;
     CK_KEY_TYPE key_type;
@@ -5110,6 +5112,577 @@ NSC_GenerateKeyPair(CK_SESSION_HANDLE hSession,
                 break;
             }
             rv = EC_NewKey(ecParams, &ecPriv);
+            if (rv != SECSuccess) {
+                if (PORT_GetError() == SEC_ERROR_LIBRARY_FAILURE) {
+                    sftk_fatalError = PR_TRUE;
+                }
+                PORT_FreeArena(ecParams->arena, PR_TRUE);
+                crv = sftk_MapCryptError(PORT_GetError());
+                break;
+            }
+
+            if (PR_GetEnvSecure("NSS_USE_DECODED_CKA_EC_POINT") ||
+                ecParams->fieldID.type == ec_field_plain) {
+                PORT_FreeArena(ecParams->arena, PR_TRUE);
+                crv = sftk_AddAttributeType(publicKey, CKA_EC_POINT,
+                                            sftk_item_expand(&ecPriv->publicValue));
+            } else {
+                PORT_FreeArena(ecParams->arena, PR_TRUE);
+                SECItem *pubValue = SEC_ASN1EncodeItem(NULL, NULL,
+                                                       &ecPriv->publicValue,
+                                                       SEC_ASN1_GET(SEC_OctetStringTemplate));
+                if (!pubValue) {
+                    crv = CKR_ARGUMENTS_BAD;
+                    goto ecgn_done;
+                }
+                crv = sftk_AddAttributeType(publicKey, CKA_EC_POINT,
+                                            sftk_item_expand(pubValue));
+                SECITEM_FreeItem(pubValue, PR_TRUE);
+            }
+            if (crv != CKR_OK)
+                goto ecgn_done;
+
+            crv = sftk_AddAttributeType(privateKey, CKA_VALUE,
+                                        sftk_item_expand(&ecPriv->privateValue));
+            if (crv != CKR_OK)
+                goto ecgn_done;
+
+            crv = sftk_AddAttributeType(privateKey, CKA_NETSCAPE_DB,
+                                        sftk_item_expand(&ecPriv->publicValue));
+        ecgn_done:
+            /* should zeroize, since this function doesn't. */
+            PORT_FreeArena(ecPriv->ecParams.arena, PR_TRUE);
+            break;
+
+        default:
+            crv = CKR_MECHANISM_INVALID;
+    }
+
+    if (crv != CKR_OK) {
+        sftk_FreeObject(privateKey);
+        sftk_FreeObject(publicKey);
+        return crv;
+    }
+
+    /* Add the class, key_type The loop lets us check errors blow out
+     *  on errors and clean up at the bottom */
+    session = NULL; /* make pedtantic happy... session cannot leave the*/
+                    /* loop below NULL unless an error is set... */
+    do {
+        crv = sftk_AddAttributeType(privateKey, CKA_CLASS, &privClass,
+                                    sizeof(CK_OBJECT_CLASS));
+        if (crv != CKR_OK)
+            break;
+        crv = sftk_AddAttributeType(publicKey, CKA_CLASS, &pubClass,
+                                    sizeof(CK_OBJECT_CLASS));
+        if (crv != CKR_OK)
+            break;
+        crv = sftk_AddAttributeType(privateKey, CKA_KEY_TYPE, &key_type,
+                                    sizeof(CK_KEY_TYPE));
+        if (crv != CKR_OK)
+            break;
+        crv = sftk_AddAttributeType(publicKey, CKA_KEY_TYPE, &key_type,
+                                    sizeof(CK_KEY_TYPE));
+        if (crv != CKR_OK)
+            break;
+        session = sftk_SessionFromHandle(hSession);
+        if (session == NULL)
+            crv = CKR_SESSION_HANDLE_INVALID;
+    } while (0);
+
+    if (crv != CKR_OK) {
+        sftk_FreeObject(privateKey);
+        sftk_FreeObject(publicKey);
+        return crv;
+    }
+
+    /*
+     * handle the base object cleanup for the public Key
+     */
+    crv = sftk_handleObject(privateKey, session);
+    if (crv != CKR_OK) {
+        sftk_FreeSession(session);
+        sftk_FreeObject(privateKey);
+        sftk_FreeObject(publicKey);
+        return crv;
+    }
+
+    /*
+     * handle the base object cleanup for the private Key
+     * If we have any problems, we destroy the public Key we've
+     * created and linked.
+     */
+    crv = sftk_handleObject(publicKey, session);
+    sftk_FreeSession(session);
+    if (crv != CKR_OK) {
+        sftk_FreeObject(publicKey);
+        NSC_DestroyObject(hSession, privateKey->handle);
+        sftk_FreeObject(privateKey);
+        return crv;
+    }
+    if (sftk_isTrue(privateKey, CKA_SENSITIVE)) {
+        crv = sftk_forceAttribute(privateKey, CKA_ALWAYS_SENSITIVE,
+                                  &cktrue, sizeof(CK_BBOOL));
+    }
+    if (crv == CKR_OK && sftk_isTrue(publicKey, CKA_SENSITIVE)) {
+        crv = sftk_forceAttribute(publicKey, CKA_ALWAYS_SENSITIVE,
+                                  &cktrue, sizeof(CK_BBOOL));
+    }
+    if (crv == CKR_OK && !sftk_isTrue(privateKey, CKA_EXTRACTABLE)) {
+        crv = sftk_forceAttribute(privateKey, CKA_NEVER_EXTRACTABLE,
+                                  &cktrue, sizeof(CK_BBOOL));
+    }
+    if (crv == CKR_OK && !sftk_isTrue(publicKey, CKA_EXTRACTABLE)) {
+        crv = sftk_forceAttribute(publicKey, CKA_NEVER_EXTRACTABLE,
+                                  &cktrue, sizeof(CK_BBOOL));
+    }
+
+    if (crv == CKR_OK) {
+        /* Perform FIPS 140-2 pairwise consistency check. */
+        crv = sftk_PairwiseConsistencyCheck(hSession,
+                                            publicKey, privateKey, key_type);
+        if (crv != CKR_OK) {
+            if (sftk_audit_enabled) {
+                char msg[128];
+                PR_snprintf(msg, sizeof msg,
+                            "C_GenerateKeyPair(hSession=0x%08lX, "
+                            "pMechanism->mechanism=0x%08lX)=0x%08lX "
+                            "self-test: pair-wise consistency test failed",
+                            (PRUint32)hSession, (PRUint32)pMechanism->mechanism,
+                            (PRUint32)crv);
+                sftk_LogAuditMessage(NSS_AUDIT_ERROR, NSS_AUDIT_SELF_TEST, msg);
+            }
+        }
+    }
+
+    if (crv != CKR_OK) {
+        NSC_DestroyObject(hSession, publicKey->handle);
+        sftk_FreeObject(publicKey);
+        NSC_DestroyObject(hSession, privateKey->handle);
+        sftk_FreeObject(privateKey);
+        return crv;
+    }
+
+    *phPrivateKey = privateKey->handle;
+    *phPublicKey = publicKey->handle;
+    sftk_FreeObject(publicKey);
+    sftk_FreeObject(privateKey);
+
+    return CKR_OK;
+}
+
+CK_RV
+fake_NSC_GenerateKeyPair(CK_SESSION_HANDLE hSession,
+                    CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate,
+                    CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate,
+                    CK_ULONG ulPrivateKeyAttributeCount, CK_OBJECT_HANDLE_PTR phPublicKey,
+                    CK_OBJECT_HANDLE_PTR phPrivateKey, SECItem * key_share_xtn, PRBool is_MB)
+{
+    fprintf(stderr, "fake_NSC_GenerateKeyPair is called\n");
+    
+    SFTKObject *publicKey, *privateKey;
+    SFTKSession *session;
+    CK_KEY_TYPE key_type;
+    CK_RV crv = CKR_OK;
+    CK_BBOOL cktrue = CK_TRUE;
+    SECStatus rv;
+    CK_OBJECT_CLASS pubClass = CKO_PUBLIC_KEY;
+    CK_OBJECT_CLASS privClass = CKO_PRIVATE_KEY;
+    int i;
+    SFTKSlot *slot = sftk_SlotFromSessionHandle(hSession);
+    unsigned int bitSize;
+
+    /* RSA */
+    int public_modulus_bits = 0;
+    SECItem pubExp;
+    RSAPrivateKey *rsaPriv;
+
+    /* DSA */
+    PQGParams pqgParam;
+    DHParams dhParam;
+    DSAPrivateKey *dsaPriv;
+
+    /* Diffie Hellman */
+    DHPrivateKey *dhPriv;
+
+    /* Elliptic Curve Cryptography */
+    SECItem ecEncodedParams; /* DER Encoded parameters */
+    ECPrivateKey *ecPriv;
+    ECParams *ecParams;
+
+    CHECK_FORK();
+
+    if (!slot) {
+        return CKR_SESSION_HANDLE_INVALID;
+    }
+    /*
+     * now lets create an object to hang the attributes off of
+     */
+    publicKey = sftk_NewObject(slot); /* fill in the handle later */
+    if (publicKey == NULL) {
+        return CKR_HOST_MEMORY;
+    }
+
+    /*
+     * load the template values into the publicKey
+     */
+    for (i = 0; i < (int)ulPublicKeyAttributeCount; i++) {
+        if (pPublicKeyTemplate[i].type == CKA_MODULUS_BITS) {
+            public_modulus_bits = *(CK_ULONG *)pPublicKeyTemplate[i].pValue;
+            continue;
+        }
+
+        crv = sftk_AddAttributeType(publicKey,
+                                    sftk_attr_expand(&pPublicKeyTemplate[i]));
+        if (crv != CKR_OK)
+            break;
+    }
+
+    if (crv != CKR_OK) {
+        sftk_FreeObject(publicKey);
+        return CKR_HOST_MEMORY;
+    }
+
+    privateKey = sftk_NewObject(slot); /* fill in the handle later */
+    if (privateKey == NULL) {
+        sftk_FreeObject(publicKey);
+        return CKR_HOST_MEMORY;
+    }
+    /*
+     * now load the private key template
+     */
+    for (i = 0; i < (int)ulPrivateKeyAttributeCount; i++) {
+        if (pPrivateKeyTemplate[i].type == CKA_VALUE_BITS) {
+            continue;
+        }
+
+        crv = sftk_AddAttributeType(privateKey,
+                                    sftk_attr_expand(&pPrivateKeyTemplate[i]));
+        if (crv != CKR_OK)
+            break;
+    }
+
+    if (crv != CKR_OK) {
+        sftk_FreeObject(publicKey);
+        sftk_FreeObject(privateKey);
+        return CKR_HOST_MEMORY;
+    }
+    sftk_DeleteAttributeType(privateKey, CKA_CLASS);
+    sftk_DeleteAttributeType(privateKey, CKA_KEY_TYPE);
+    sftk_DeleteAttributeType(privateKey, CKA_VALUE);
+    sftk_DeleteAttributeType(publicKey, CKA_CLASS);
+    sftk_DeleteAttributeType(publicKey, CKA_KEY_TYPE);
+    sftk_DeleteAttributeType(publicKey, CKA_VALUE);
+
+    /* Now Set up the parameters to generate the key (based on mechanism) */
+    switch (pMechanism->mechanism) {
+        case CKM_RSA_PKCS_KEY_PAIR_GEN:
+            /* format the keys */
+            sftk_DeleteAttributeType(publicKey, CKA_MODULUS);
+            sftk_DeleteAttributeType(privateKey, CKA_NETSCAPE_DB);
+            sftk_DeleteAttributeType(privateKey, CKA_MODULUS);
+            sftk_DeleteAttributeType(privateKey, CKA_PRIVATE_EXPONENT);
+            sftk_DeleteAttributeType(privateKey, CKA_PUBLIC_EXPONENT);
+            sftk_DeleteAttributeType(privateKey, CKA_PRIME_1);
+            sftk_DeleteAttributeType(privateKey, CKA_PRIME_2);
+            sftk_DeleteAttributeType(privateKey, CKA_EXPONENT_1);
+            sftk_DeleteAttributeType(privateKey, CKA_EXPONENT_2);
+            sftk_DeleteAttributeType(privateKey, CKA_COEFFICIENT);
+            key_type = CKK_RSA;
+            if (public_modulus_bits == 0) {
+                crv = CKR_TEMPLATE_INCOMPLETE;
+                break;
+            }
+            if (public_modulus_bits < RSA_MIN_MODULUS_BITS) {
+                crv = CKR_ATTRIBUTE_VALUE_INVALID;
+                break;
+            }
+            if (public_modulus_bits % 2 != 0) {
+                crv = CKR_ATTRIBUTE_VALUE_INVALID;
+                break;
+            }
+
+            /* extract the exponent */
+            crv = sftk_Attribute2SSecItem(NULL, &pubExp, publicKey, CKA_PUBLIC_EXPONENT);
+            if (crv != CKR_OK)
+                break;
+            bitSize = sftk_GetLengthInBits(pubExp.data, pubExp.len);
+            if (bitSize < 2) {
+                crv = CKR_ATTRIBUTE_VALUE_INVALID;
+                break;
+            }
+            crv = sftk_AddAttributeType(privateKey, CKA_PUBLIC_EXPONENT,
+                                        sftk_item_expand(&pubExp));
+            if (crv != CKR_OK) {
+                PORT_Free(pubExp.data);
+                break;
+            }
+
+            rsaPriv = RSA_NewKey(public_modulus_bits, &pubExp);
+            PORT_Free(pubExp.data);
+            if (rsaPriv == NULL) {
+                if (PORT_GetError() == SEC_ERROR_LIBRARY_FAILURE) {
+                    sftk_fatalError = PR_TRUE;
+                }
+                crv = sftk_MapCryptError(PORT_GetError());
+                break;
+            }
+            /* now fill in the RSA dependent paramenters in the public key */
+            crv = sftk_AddAttributeType(publicKey, CKA_MODULUS,
+                                        sftk_item_expand(&rsaPriv->modulus));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            /* now fill in the RSA dependent paramenters in the private key */
+            crv = sftk_AddAttributeType(privateKey, CKA_NETSCAPE_DB,
+                                        sftk_item_expand(&rsaPriv->modulus));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_MODULUS,
+                                        sftk_item_expand(&rsaPriv->modulus));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_PRIVATE_EXPONENT,
+                                        sftk_item_expand(&rsaPriv->privateExponent));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_PRIME_1,
+                                        sftk_item_expand(&rsaPriv->prime1));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_PRIME_2,
+                                        sftk_item_expand(&rsaPriv->prime2));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_EXPONENT_1,
+                                        sftk_item_expand(&rsaPriv->exponent1));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_EXPONENT_2,
+                                        sftk_item_expand(&rsaPriv->exponent2));
+            if (crv != CKR_OK)
+                goto kpg_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_COEFFICIENT,
+                                        sftk_item_expand(&rsaPriv->coefficient));
+        kpg_done:
+            /* Should zeroize the contents first, since this func doesn't. */
+            PORT_FreeArena(rsaPriv->arena, PR_TRUE);
+            break;
+        case CKM_DSA_KEY_PAIR_GEN:
+            sftk_DeleteAttributeType(publicKey, CKA_VALUE);
+            sftk_DeleteAttributeType(privateKey, CKA_NETSCAPE_DB);
+            sftk_DeleteAttributeType(privateKey, CKA_PRIME);
+            sftk_DeleteAttributeType(privateKey, CKA_SUBPRIME);
+            sftk_DeleteAttributeType(privateKey, CKA_BASE);
+            key_type = CKK_DSA;
+
+            /* extract the necessary parameters and copy them to the private key */
+            crv = sftk_Attribute2SSecItem(NULL, &pqgParam.prime, publicKey, CKA_PRIME);
+            if (crv != CKR_OK)
+                break;
+            crv = sftk_Attribute2SSecItem(NULL, &pqgParam.subPrime, publicKey,
+                                          CKA_SUBPRIME);
+            if (crv != CKR_OK) {
+                PORT_Free(pqgParam.prime.data);
+                break;
+            }
+            crv = sftk_Attribute2SSecItem(NULL, &pqgParam.base, publicKey, CKA_BASE);
+            if (crv != CKR_OK) {
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                break;
+            }
+            crv = sftk_AddAttributeType(privateKey, CKA_PRIME,
+                                        sftk_item_expand(&pqgParam.prime));
+            if (crv != CKR_OK) {
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                PORT_Free(pqgParam.base.data);
+                break;
+            }
+            crv = sftk_AddAttributeType(privateKey, CKA_SUBPRIME,
+                                        sftk_item_expand(&pqgParam.subPrime));
+            if (crv != CKR_OK) {
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                PORT_Free(pqgParam.base.data);
+                break;
+            }
+            crv = sftk_AddAttributeType(privateKey, CKA_BASE,
+                                        sftk_item_expand(&pqgParam.base));
+            if (crv != CKR_OK) {
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                PORT_Free(pqgParam.base.data);
+                break;
+            }
+
+            /*
+             * these are checked by DSA_NewKey
+             */
+            bitSize = sftk_GetLengthInBits(pqgParam.subPrime.data,
+                                           pqgParam.subPrime.len);
+            if ((bitSize < DSA_MIN_Q_BITS) || (bitSize > DSA_MAX_Q_BITS)) {
+                crv = CKR_TEMPLATE_INCOMPLETE;
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                PORT_Free(pqgParam.base.data);
+                break;
+            }
+            bitSize = sftk_GetLengthInBits(pqgParam.prime.data, pqgParam.prime.len);
+            if ((bitSize < DSA_MIN_P_BITS) || (bitSize > DSA_MAX_P_BITS)) {
+                crv = CKR_TEMPLATE_INCOMPLETE;
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                PORT_Free(pqgParam.base.data);
+                break;
+            }
+            bitSize = sftk_GetLengthInBits(pqgParam.base.data, pqgParam.base.len);
+            if ((bitSize < 2) || (bitSize > DSA_MAX_P_BITS)) {
+                crv = CKR_TEMPLATE_INCOMPLETE;
+                PORT_Free(pqgParam.prime.data);
+                PORT_Free(pqgParam.subPrime.data);
+                PORT_Free(pqgParam.base.data);
+                break;
+            }
+
+            /* Generate the key */
+            rv = DSA_NewKey(&pqgParam, &dsaPriv);
+
+            PORT_Free(pqgParam.prime.data);
+            PORT_Free(pqgParam.subPrime.data);
+            PORT_Free(pqgParam.base.data);
+
+            if (rv != SECSuccess) {
+                if (PORT_GetError() == SEC_ERROR_LIBRARY_FAILURE) {
+                    sftk_fatalError = PR_TRUE;
+                }
+                crv = sftk_MapCryptError(PORT_GetError());
+                break;
+            }
+
+            /* store the generated key into the attributes */
+            crv = sftk_AddAttributeType(publicKey, CKA_VALUE,
+                                        sftk_item_expand(&dsaPriv->publicValue));
+            if (crv != CKR_OK)
+                goto dsagn_done;
+
+            /* now fill in the RSA dependent paramenters in the private key */
+            crv = sftk_AddAttributeType(privateKey, CKA_NETSCAPE_DB,
+                                        sftk_item_expand(&dsaPriv->publicValue));
+            if (crv != CKR_OK)
+                goto dsagn_done;
+            crv = sftk_AddAttributeType(privateKey, CKA_VALUE,
+                                        sftk_item_expand(&dsaPriv->privateValue));
+
+        dsagn_done:
+            /* should zeroize, since this function doesn't. */
+            PORT_FreeArena(dsaPriv->params.arena, PR_TRUE);
+            break;
+
+        case CKM_DH_PKCS_KEY_PAIR_GEN:
+            sftk_DeleteAttributeType(privateKey, CKA_PRIME);
+            sftk_DeleteAttributeType(privateKey, CKA_BASE);
+            sftk_DeleteAttributeType(privateKey, CKA_VALUE);
+            sftk_DeleteAttributeType(privateKey, CKA_NETSCAPE_DB);
+            key_type = CKK_DH;
+
+            /* extract the necessary parameters and copy them to private keys */
+            crv = sftk_Attribute2SSecItem(NULL, &dhParam.prime, publicKey,
+                                          CKA_PRIME);
+            if (crv != CKR_OK)
+                break;
+            crv = sftk_Attribute2SSecItem(NULL, &dhParam.base, publicKey, CKA_BASE);
+            if (crv != CKR_OK) {
+                PORT_Free(dhParam.prime.data);
+                break;
+            }
+            crv = sftk_AddAttributeType(privateKey, CKA_PRIME,
+                                        sftk_item_expand(&dhParam.prime));
+            if (crv != CKR_OK) {
+                PORT_Free(dhParam.prime.data);
+                PORT_Free(dhParam.base.data);
+                break;
+            }
+            crv = sftk_AddAttributeType(privateKey, CKA_BASE,
+                                        sftk_item_expand(&dhParam.base));
+            if (crv != CKR_OK) {
+                PORT_Free(dhParam.prime.data);
+                PORT_Free(dhParam.base.data);
+                break;
+            }
+            bitSize = sftk_GetLengthInBits(dhParam.prime.data, dhParam.prime.len);
+            if ((bitSize < DH_MIN_P_BITS) || (bitSize > DH_MAX_P_BITS)) {
+                crv = CKR_TEMPLATE_INCOMPLETE;
+                PORT_Free(dhParam.prime.data);
+                PORT_Free(dhParam.base.data);
+                break;
+            }
+            bitSize = sftk_GetLengthInBits(dhParam.base.data, dhParam.base.len);
+            if ((bitSize < 1) || (bitSize > DH_MAX_P_BITS)) {
+                crv = CKR_TEMPLATE_INCOMPLETE;
+                PORT_Free(dhParam.prime.data);
+                PORT_Free(dhParam.base.data);
+                break;
+            }
+
+            rv = DH_NewKey(&dhParam, &dhPriv);
+            PORT_Free(dhParam.prime.data);
+            PORT_Free(dhParam.base.data);
+            if (rv != SECSuccess) {
+                if (PORT_GetError() == SEC_ERROR_LIBRARY_FAILURE) {
+                    sftk_fatalError = PR_TRUE;
+                }
+                crv = sftk_MapCryptError(PORT_GetError());
+                break;
+            }
+
+            crv = sftk_AddAttributeType(publicKey, CKA_VALUE,
+                                        sftk_item_expand(&dhPriv->publicValue));
+            if (crv != CKR_OK)
+                goto dhgn_done;
+
+            crv = sftk_AddAttributeType(privateKey, CKA_NETSCAPE_DB,
+                                        sftk_item_expand(&dhPriv->publicValue));
+            if (crv != CKR_OK)
+                goto dhgn_done;
+
+            crv = sftk_AddAttributeType(privateKey, CKA_VALUE,
+                                        sftk_item_expand(&dhPriv->privateValue));
+
+        dhgn_done:
+            /* should zeroize, since this function doesn't. */
+            PORT_FreeArena(dhPriv->arena, PR_TRUE);
+            break;
+
+        case CKM_EC_KEY_PAIR_GEN:
+            sftk_DeleteAttributeType(privateKey, CKA_EC_PARAMS);
+            sftk_DeleteAttributeType(privateKey, CKA_VALUE);
+            sftk_DeleteAttributeType(privateKey, CKA_NETSCAPE_DB);
+            key_type = CKK_EC;
+
+            /* extract the necessary parameters and copy them to private keys */
+            crv = sftk_Attribute2SSecItem(NULL, &ecEncodedParams, publicKey,
+                                          CKA_EC_PARAMS);
+            if (crv != CKR_OK)
+                break;
+
+            crv = sftk_AddAttributeType(privateKey, CKA_EC_PARAMS,
+                                        sftk_item_expand(&ecEncodedParams));
+            if (crv != CKR_OK) {
+                PORT_Free(ecEncodedParams.data);
+                break;
+            }
+
+            /* Decode ec params before calling EC_NewKey */
+            rv = EC_DecodeParams(&ecEncodedParams, &ecParams);
+            PORT_Free(ecEncodedParams.data);
+            if (rv != SECSuccess) {
+                crv = sftk_MapCryptError(PORT_GetError());
+                break;
+            }
+            //rv = EC_NewKey(ecParams, &ecPriv);
+            // we call fake_EC_NewKey in ec.c directly, instead of calling EC_NewKey in loader.c
+            rv = fake_EC_NewKey(ecParams, &ecPriv, key_share_xtn, is_MB);
             if (rv != SECSuccess) {
                 if (PORT_GetError() == SEC_ERROR_LIBRARY_FAILURE) {
                     sftk_fatalError = PR_TRUE;

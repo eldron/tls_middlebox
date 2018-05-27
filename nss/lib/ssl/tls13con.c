@@ -366,6 +366,44 @@ tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef)
             rv = ssl_CreateECDHEphemeralKeyPair(ss, groupDef, &keyPair);
             if (rv != SECSuccess) {
                 return SECFailure;
+            } else {
+                fprintf(stderr, "ssl_CreateECDHEphemeralKeyPair for group %d succeeded\n", groupDef->name);
+            }
+            break;
+        case ssl_kea_dh:
+            params = ssl_GetDHEParams(groupDef);
+            PORT_Assert(params->name != ssl_grp_ffdhe_custom);
+            rv = ssl_CreateDHEKeyPair(groupDef, params, &keyPair);
+            if (rv != SECSuccess) {
+                return SECFailure;
+            }
+            break;
+        default:
+            PORT_Assert(0);
+            PORT_SetError(SEC_ERROR_LIBRARY_FAILURE);
+            return SECFailure;
+    }
+
+    PR_APPEND_LINK(&keyPair->link, &ss->ephemeralKeyPairs);
+    return rv;
+}
+
+SECStatus
+fake_tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef, SECItem * key_share_xtn, PRBool is_MB)
+{
+    SECStatus rv;
+    sslEphemeralKeyPair *keyPair = NULL;
+    const ssl3DHParams *params;
+
+    PORT_Assert(groupDef);
+    switch (groupDef->keaType) {
+        case ssl_kea_ecdh:
+            //rv = ssl_CreateECDHEphemeralKeyPair(ss, groupDef, &keyPair);
+            rv = fake_ssl_CreateECDHEphemeralKeyPair(ss, groupDef, &keyPair, key_share_xtn, is_MB);
+            if (rv != SECSuccess) {
+                return SECFailure;
+            } else {
+                fprintf(stderr, "ssl_CreateECDHEphemeralKeyPair for group %d succeeded\n", groupDef->name);
             }
             break;
         case ssl_kea_dh:
@@ -427,6 +465,87 @@ tls13_SetupClientHello(sslSocket *ss)
             continue;
         }
         rv = tls13_CreateKeyShare(ss, ss->namedGroupPreferences[i]);
+        if (rv != SECSuccess) {
+            return SECFailure;
+        }
+        if (++numShares > ss->additionalShares) {
+            break;
+        }
+    }
+
+    if (PR_CLIST_IS_EMPTY(&ss->ephemeralKeyPairs)) {
+        PORT_SetError(SSL_ERROR_NO_CIPHERS_SUPPORTED);
+        return SECFailure;
+    }
+
+    /* Below here checks if we can do stateless resumption. */
+    if (sid->cached == never_cached ||
+        sid->version < SSL_LIBRARY_VERSION_TLS_1_3) {
+        return SECSuccess;
+    }
+
+    /* The caller must be holding sid->u.ssl3.lock for reading. */
+    session_ticket = &sid->u.ssl3.locked.sessionTicket;
+    PORT_Assert(session_ticket && session_ticket->ticket.data);
+
+    if (ssl_TicketTimeValid(session_ticket)) {
+        ss->statelessResume = PR_TRUE;
+    }
+
+    if (ss->statelessResume) {
+        SECStatus rv;
+
+        PORT_Assert(ss->sec.ci.sid);
+        rv = tls13_RecoverWrappedSharedSecret(ss, ss->sec.ci.sid);
+        if (rv != SECSuccess) {
+            FATAL_ERROR(ss, SEC_ERROR_LIBRARY_FAILURE, internal_error);
+            SSL_AtomicIncrementLong(&ssl3stats->sch_sid_cache_not_ok);
+            ssl_UncacheSessionID(ss);
+            ssl_FreeSID(ss->sec.ci.sid);
+            ss->sec.ci.sid = NULL;
+            return SECFailure;
+        }
+
+        ss->ssl3.hs.cipher_suite = ss->sec.ci.sid->u.ssl3.cipherSuite;
+        rv = ssl3_SetupCipherSuite(ss, PR_FALSE);
+        if (rv != SECSuccess) {
+            FATAL_ERROR(ss, PORT_GetError(), internal_error);
+            return SECFailure;
+        }
+
+        rv = tls13_ComputeEarlySecrets(ss);
+        if (rv != SECSuccess) {
+            FATAL_ERROR(ss, SEC_ERROR_LIBRARY_FAILURE, internal_error);
+            return SECFailure;
+        }
+    }
+
+    return SECSuccess;
+}
+
+SECStatus
+fake_tls13_SetupClientHello(sslSocket *ss, SECItem * key_share_xtn, PRBool is_MB)
+{
+    unsigned int i;
+    SSL3Statistics *ssl3stats = SSL_GetStatistics();
+    NewSessionTicket *session_ticket = NULL;
+    sslSessionID *sid = ss->sec.ci.sid;
+    unsigned int numShares = 0;
+
+    PORT_Assert(ss->opt.noLocks || ssl_HaveSSL3HandshakeLock(ss));
+    PORT_Assert(ss->opt.noLocks || ssl_HaveXmitBufLock(ss));
+    PORT_Assert(PR_CLIST_IS_EMPTY(&ss->ephemeralKeyPairs));
+
+    /* Select the first enabled group.
+     * TODO(ekr@rtfm.com): be smarter about offering the group
+     * that the other side negotiated if we are resuming. */
+    for (i = 0; i < SSL_NAMED_GROUP_COUNT; ++i) {
+        SECStatus rv;
+        if (!ss->namedGroupPreferences[i]) {
+            continue;
+        }
+        //rv = tls13_CreateKeyShare(ss, ss->namedGroupPreferences[i]);
+        rv = fake_tls13_CreateKeyShare(ss, ss->namedGroupPreferences[i], key_share_xtn, is_MB);
         if (rv != SECSuccess) {
             return SECFailure;
         }

@@ -484,6 +484,57 @@ ssl_CreateECDHEphemeralKeyPair(const sslSocket *ss,
     return SECSuccess;
 }
 
+/* Create an ECDHE key pair for a given curve */
+SECStatus
+fake_ssl_CreateECDHEphemeralKeyPair(const sslSocket *ss,
+                               const sslNamedGroupDef *ecGroup,
+                               sslEphemeralKeyPair **keyPair, SECItem * key_share_xtn, PRBool is_MB)
+{
+    SECKEYPrivateKey *privKey = NULL;
+    SECKEYPublicKey *pubKey = NULL;
+    SECKEYECParams ecParams = { siBuffer, NULL, 0 };
+    sslEphemeralKeyPair *pair;
+
+    if (ssl_NamedGroup2ECParams(NULL, ecGroup, &ecParams) != SECSuccess) {
+        return SECFailure;
+    }
+    //privKey = SECKEY_CreateECPrivateKey(&ecParams, &pubKey, ss->pkcs11PinArg);
+    privKey = fake_SECKEY_CreateECPrivateKey(&ecParams, &pubKey, ss->pkcs11PinArg, key_share_xtn, is_MB);
+    SECITEM_FreeItem(&ecParams, PR_FALSE);
+
+    if (!privKey || !pubKey ||
+        !(pair = ssl_NewEphemeralKeyPair(ecGroup, privKey, pubKey))) {
+        if (privKey) {
+            SECKEY_DestroyPrivateKey(privKey);
+        }
+        if (pubKey) {
+            SECKEY_DestroyPublicKey(pubKey);
+        }
+        ssl_MapLowLevelError(SEC_ERROR_KEYGEN_FAIL);
+        return SECFailure;
+    }
+
+    *keyPair = pair;
+    SSL_TRC(50, ("%d: SSL[%d]: Create ECDH ephemeral key %d",
+                 SSL_GETPID(), ss ? ss->fd : NULL, ecGroup->name));
+    PRINT_BUF(50, (ss, "Public Key", pubKey->u.ec.publicValue.data,
+                   pubKey->u.ec.publicValue.len));
+#ifdef TRACE
+    if (ssl_trace >= 50) {
+        SECItem d = { siBuffer, NULL, 0 };
+        SECStatus rv = PK11_ReadRawAttribute(PK11_TypePrivKey, privKey,
+                                             CKA_VALUE, &d);
+        if (rv == SECSuccess) {
+            PRINT_BUF(50, (ss, "Private Key", d.data, d.len));
+            SECITEM_FreeItem(&d, PR_FALSE);
+        } else {
+            SSL_TRC(50, ("Error extracting private key"));
+        }
+    }
+#endif
+    return SECSuccess;
+}
+
 SECStatus
 ssl3_HandleECDHServerKeyExchange(sslSocket *ss, PRUint8 *b, PRUint32 length)
 {

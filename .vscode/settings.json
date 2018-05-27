@@ -14,6 +14,7 @@
         "fstream": "c",
         "sslimpl.h": "c",
         "chrono": "c",
-        "limits": "c"
+        "limits": "c",
+        "*.api": "c"
     }
 }

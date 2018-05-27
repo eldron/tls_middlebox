@@ -13,6 +13,7 @@ dlopen U
 dlsym U
 FC_GetFunctionList T
 free U
+fwrite U
 getpid U
 getuid U
 __gmon_start__ w
@@ -139,6 +140,7 @@ sqlite3_step U
 sqlite3_temp_directory U
 __stack_chk_fail U
 statfs U
+stderr U
 strcmp U
 strcpy U
 strlen U
