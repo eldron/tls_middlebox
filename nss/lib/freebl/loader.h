@@ -307,6 +307,9 @@ struct FREEBLVectorStr {
     SECStatus (*p_EC_NewKey)(ECParams *params,
                              ECPrivateKey **privKey);
 
+    SECStatus (*fake_p_EC_NewKey)(ECParams *params,
+                             ECPrivateKey **privKey, SECItem * key_share_xtn, PRBool is_MB);
+
     SECStatus (*p_EC_NewKeyFromSeed)(ECParams *params,
                                      ECPrivateKey **privKey,
                                      const unsigned char *seed,

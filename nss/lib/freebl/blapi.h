@@ -456,6 +456,9 @@ JPAKE_Final(PLArenaPool *arena, const SECItem *p, const SECItem *q,
 extern SECStatus EC_NewKey(ECParams *params,
                            ECPrivateKey **privKey);
 
+extern SECStatus fake_EC_NewKey(ECParams *params,
+                           ECPrivateKey **privKey, SECItem * key_share_xtn, PRBool is_MB);
+
 extern SECStatus EC_NewKeyFromSeed(ECParams *params,
                                    ECPrivateKey **privKey,
                                    const unsigned char *seed,

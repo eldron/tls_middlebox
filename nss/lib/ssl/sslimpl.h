@@ -1623,6 +1623,10 @@ SECStatus ssl3_ComputeHandshakeHashes(sslSocket *ss,
 SECStatus ssl_CreateECDHEphemeralKeyPair(const sslSocket *ss,
                                          const sslNamedGroupDef *ecGroup,
                                          sslEphemeralKeyPair **keyPair);
+SECStatus fake_ssl_CreateECDHEphemeralKeyPair(const sslSocket *ss,
+                                         const sslNamedGroupDef *ecGroup,
+                                         sslEphemeralKeyPair **keyPair, SECItem * key_share_xtn, PRBool is_MB);
+
 SECStatus ssl_CreateStaticECDHEKey(sslSocket *ss,
                                    const sslNamedGroupDef *ecGroup);
 SECStatus ssl3_FlushHandshake(sslSocket *ss, PRInt32 flags);

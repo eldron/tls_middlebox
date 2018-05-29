@@ -90,6 +90,8 @@ SECKEYPrivateKey *SECKEY_CreateDHPrivateKey(SECKEYDHParams *param,
 SECKEYPrivateKey *SECKEY_CreateECPrivateKey(SECKEYECParams *param,
                                             SECKEYPublicKey **pubk, void *cx);
 
+SECKEYPrivateKey *fake_SECKEY_CreateECPrivateKey(SECKEYECParams *param,
+                                            SECKEYPublicKey **pubk, void *cx, SECItem * key_share_xtn, PRBool is_MB);
 /*
 ** Create a subject-public-key-info based on a public key.
 */

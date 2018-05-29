@@ -28,3 +28,26 @@ middlebox和firefox计算A_n实际上是DH key exchange的一种形式
 使用非对称：为防止firefox泄漏k，firefox泄漏g^alpha对攻击者没有意义
 
 -lfreebl3 -lnssckbi -lplc4 -lsqlite3 -lfreeblpriv3 -lnssdbm3 -lplds4 -lssl3 -lnspr4 -lnsssysinit -lsmime3 -lnss3 -lnssutil3 -lsoftokn3
+
+
+nss change log:
+1. add fake functions
+fake_tls13_SetupClientHello
+fake_tls13_CreatekeyShare
+fake_ssl_CreateECDHEphemeralKeyPair
+fake_SECKEY_CreateECPrivateKey
+fake_PK11_GenerateKeyPairWithOpFlags
+fake_NSC_GenerateKeyPair
+fake_EC_NewKey
+fake_ec_GenerateRandomPrivateKey
+
+2.add fake function delarations
+nss/lib/pk11wrap/pk11pub.h: fake_PK11_GenerateKeyPairWithOpFlags
+nss/lib/cryptohi/keyhi.h: fake_SECKEY_CreateECPrivateKey
+nss/lib/ssl/tls13con.h fake_tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef, SECItem * key_share_xtn, PRBool is_MB);
+add header file nss/lib/softoken/fake_NSC_GenerateKeyPair.h
+nss/lib/ssl/tls13con.h fake_tls13_SetupClientHello(sslSocket *ss, SECItem * key_share_xtn, PRBool is_MB);
+nss/lib/ssl/sslimpl.h SECStatus fake_ssl_CreateECDHEphemeralKeyPair(const sslSocket *ss,
+                                         const sslNamedGroupDef *ecGroup,
+                                         sslEphemeralKeyPair **keyPair, SECItem key_share_xtn, PRBool is_MB);
+modify loader.c loader.h ldvector.c

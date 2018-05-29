@@ -17,6 +17,7 @@
 extern "C" {
 #endif
 
+
 /* Before including this file (pkcs11.h) (or pkcs11t.h by
  * itself), 6 platform-specific macros must be defined.  These
  * macros are described below, and typical definitions for them

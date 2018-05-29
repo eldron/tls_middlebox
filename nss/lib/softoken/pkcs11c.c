@@ -38,6 +38,9 @@
 #include "prprf.h"
 #include "prenv.h"
 
+#include "fake_NSC_GenerateKeyPair.h"
+//#include "../freebl/fake_ec_new_key.h"
+
 #define __PASTE(x, y) x##y
 
 /*

@@ -1,0 +1,1 @@
+-Wl,--whole-archive obj/coreconf/nss3.empty.o libnss_static.a libcerthi.a libcryptohi.a libpk11wrap.a libcertdb.a libnsspki.a libnssdev.a libnssb.a /home/work/Documents/tls_middlebox/dist/Debug/lib/libnssutil3.so -Wl,--no-whole-archive -L/home/work/Documents/tls_middlebox/dist/Debug/lib -lpthread -ldl -lc -lplds4 -lplc4 -lnspr4

@@ -63,6 +63,8 @@ SECStatus tls13_DeriveSecretNullHash(sslSocket *ss, PK11SymKey *key,
 void tls13_FatalError(sslSocket *ss, PRErrorCode prError,
                       SSL3AlertDescription desc);
 SECStatus tls13_SetupClientHello(sslSocket *ss);
+SECStatus fake_tls13_SetupClientHello(sslSocket *ss, SECItem * key_share_xtn, PRBool is_MB);
+
 SECStatus tls13_MaybeDo0RTTHandshake(sslSocket *ss);
 PRInt32 tls13_LimitEarlyData(sslSocket *ss, SSL3ContentType type, PRInt32 toSend);
 PRBool tls13_AllowPskCipher(const sslSocket *ss,
@@ -88,6 +90,7 @@ SECStatus tls13_HandleHelloRetryRequest(sslSocket *ss, const PRUint8 *b,
 void tls13_DestroyKeyShareEntry(TLS13KeyShareEntry *entry);
 void tls13_DestroyKeyShares(PRCList *list);
 SECStatus tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef);
+SECStatus fake_tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef, SECItem * key_share_xtn, PRBool is_MB);
 void tls13_DestroyEarlyData(PRCList *list);
 SECStatus tls13_SetAlertCipherSpec(sslSocket *ss);
 tls13ExtensionStatus tls13_ExtensionStatus(PRUint16 extension,

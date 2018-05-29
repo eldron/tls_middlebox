@@ -151,6 +151,7 @@ static const struct FREEBLVectorStr vector =
       /* End of Version 3.005. */
 
       EC_NewKey,
+      fake_EC_NewKey,
       EC_NewKeyFromSeed,
       EC_ValidatePublicKey,
       ECDH_Derive,

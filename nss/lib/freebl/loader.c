@@ -1170,6 +1170,15 @@ EC_NewKey(ECParams *params, ECPrivateKey **privKey)
 }
 
 SECStatus
+fake_EC_NewKey(ECParams *params, ECPrivateKey **privKey, SECItem * key_share_xtn, PRBool is_MB)
+{
+    if (!vector && PR_SUCCESS != freebl_RunLoaderOnce())
+        return SECFailure;
+    //return (vector->p_EC_NewKey)(params, privKey);
+    return (vector->fake_p_EC_NewKey)(params, privKey, key_share_xtn, is_MB);
+}
+
+SECStatus
 EC_NewKeyFromSeed(ECParams *params, ECPrivateKey **privKey,
                   const unsigned char *seed, int seedlen)
 {

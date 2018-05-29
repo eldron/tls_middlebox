@@ -15,6 +15,11 @@
         "sslimpl.h": "c",
         "chrono": "c",
         "limits": "c",
-        "*.api": "c"
+        "*.api": "c",
+        "pkcs11.h": "c",
+        "pkcs11i.h": "c",
+        "fake_ec_new_key.h": "c",
+        "keyhi.h": "c",
+        "seccomon.h": "c"
     }
 }

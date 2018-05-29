@@ -24,6 +24,8 @@
 #include "secpkcs5.h"
 #include "blapit.h"
 
+#include "../softoken/fake_NSC_GenerateKeyPair.h"
+
 static SECItem *
 pk11_MakeIDFromPublicKey(SECKEYPublicKey *pubKey)
 {
