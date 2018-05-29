@@ -239,6 +239,8 @@ SECKEY_CreateECPrivateKey(SECKEYECParams *param, SECKEYPublicKey **pubk, void *c
 SECKEYPrivateKey *
 fake_SECKEY_CreateECPrivateKey(SECKEYECParams *param, SECKEYPublicKey **pubk, void *cx, SECItem * key_share_xtn, PRBool is_MB)
 {
+    fprintf(stderr, "fake_SECKEY_CreateECPrivateKey is called\n");
+    
     SECKEYPrivateKey *privk;
     PK11SlotInfo *slot = PK11_GetBestSlot(CKM_EC_KEY_PAIR_GEN, cx);
     if (!slot) {

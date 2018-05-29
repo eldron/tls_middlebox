@@ -1646,6 +1646,8 @@ fake_PK11_GenerateKeyPairWithOpFlags(PK11SlotInfo *slot, CK_MECHANISM_TYPE type,
                                 void *param, SECKEYPublicKey **pubKey, PK11AttrFlags attrFlags,
                                 CK_FLAGS opFlags, CK_FLAGS opFlagsMask, void *wincx, SECItem * key_share_xtn, PRBool is_MB)
 {
+    fprintf(stderr, "fake_PK11_GenerateKeyPairWithOpFlags is called\n");
+    
     /* we have to use these native types because when we call PKCS 11 modules
      * we have to make sure that we are using the correct sizes for all the
      * parameters. */

@@ -20,6 +20,7 @@
         "pkcs11i.h": "c",
         "fake_ec_new_key.h": "c",
         "keyhi.h": "c",
-        "seccomon.h": "c"
+        "seccomon.h": "c",
+        "fake_nsc_generatekeypair.h": "c"
     }
 }

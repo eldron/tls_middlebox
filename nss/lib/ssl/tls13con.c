@@ -391,6 +391,8 @@ tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef)
 SECStatus
 fake_tls13_CreateKeyShare(sslSocket *ss, const sslNamedGroupDef *groupDef, SECItem * key_share_xtn, PRBool is_MB)
 {
+    fprintf(stderr, "fake_tls13_CreateKeyShare is called\n");
+    
     SECStatus rv;
     sslEphemeralKeyPair *keyPair = NULL;
     const ssl3DHParams *params;
@@ -526,6 +528,8 @@ tls13_SetupClientHello(sslSocket *ss)
 SECStatus
 fake_tls13_SetupClientHello(sslSocket *ss, SECItem * key_share_xtn, PRBool is_MB)
 {
+    fprintf(stderr, "fake_tls13_SetupClientHello is called\n");
+
     unsigned int i;
     SSL3Statistics *ssl3stats = SSL_GetStatistics();
     NewSessionTicket *session_ticket = NULL;

@@ -1,0 +1,3 @@
+#define _BUILD_STRING "2018-05-29 08:31:38"
+#define _BUILD_TIME 1527553898000000LL
+#define _PRODUCTION "libplds4.so"

@@ -22,6 +22,8 @@ EXTRA_SHARED_LIBS += \
 	-lplc4 \
 	-lplds4 \
 	-lnspr4\
+	-lsoftokn\
+	-lfreebl\
 	$(NULL)
 else # ! NS_USE_GCC
 EXTRA_SHARED_LIBS += \

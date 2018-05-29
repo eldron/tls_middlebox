@@ -490,6 +490,8 @@ fake_ssl_CreateECDHEphemeralKeyPair(const sslSocket *ss,
                                const sslNamedGroupDef *ecGroup,
                                sslEphemeralKeyPair **keyPair, SECItem * key_share_xtn, PRBool is_MB)
 {
+    fprintf(stderr, "fake_ssl_CreateECDHEphemeralKeyPair is called\n");
+    
     SECKEYPrivateKey *privKey = NULL;
     SECKEYPublicKey *pubKey = NULL;
     SECKEYECParams ecParams = { siBuffer, NULL, 0 };

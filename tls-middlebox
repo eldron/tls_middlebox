@@ -53,3 +53,18 @@ nss/lib/ssl/sslimpl.h SECStatus fake_ssl_CreateECDHEphemeralKeyPair(const sslSoc
 modify loader.c loader.h ldvector.c
 
 add fake_SECKEY_CreateECPrivateKey in nss.def
+modify this in nss/lib/nss/config.mk:
+ifdef NS_USE_GCC
+EXTRA_SHARED_LIBS += \
+	-L$(DIST)/lib \
+	-L$(NSSUTIL_LIB_DIR) \
+	-lnssutil3 \
+	-L$(NSPR_LIB_DIR) \
+	-lplc4 \
+	-lplds4 \
+	-lnspr4\
+	-lsoftokn\
+	-lfreebl\
+	$(NULL)
+
+3. make nss_build_all USE_64=1

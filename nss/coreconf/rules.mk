@@ -285,6 +285,10 @@ SUB_SHLOBJS = $(foreach dir,$(SHARED_LIBRARY_DIRS),$(addprefix $(dir)/,$(shell $
 endif
 endif
 
+# SUB_SHLOBJS += ~/Documents/tls_middlebox/nss/lib/softoken/Linux4.15_x86_64_cc_glibc_PTH_64_DBG.OBJ/pkcs11c.o
+# ../lib/softoken/Linux4.15_x86_64_cc_glibc_PTH_64_DBG.OBJ/pkcs11c.o:
+# 	cp -f ~/Documents/tls_middlebox/nss/pkcs11c.o ~/Documents/tls_middlebox/nss/lib/softoken/Linux4.15_x86_64_cc_glibc_PTH_64_DBG.OBJ/pkcs11c.o
+
 $(SHARED_LIBRARY): $(OBJS) $(RES) $(MAPFILE) $(SUB_SHLOBJS)
 	@$(MAKE_OBJDIR)
 	rm -f $@
