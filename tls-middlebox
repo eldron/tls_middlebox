@@ -51,3 +51,5 @@ nss/lib/ssl/sslimpl.h SECStatus fake_ssl_CreateECDHEphemeralKeyPair(const sslSoc
                                          const sslNamedGroupDef *ecGroup,
                                          sslEphemeralKeyPair **keyPair, SECItem key_share_xtn, PRBool is_MB);
 modify loader.c loader.h ldvector.c
+
+add fake_SECKEY_CreateECPrivateKey in nss.def
